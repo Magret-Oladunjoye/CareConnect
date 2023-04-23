@@ -1,7 +1,8 @@
 #create website routes for our websites where users can go to, except login 
 
-from flask import Blueprint, render_template, request #define that this file is a blueprint of our app
+from flask import Blueprint, render_template, jsonify, request #define that this file is a blueprint of our app
 from database.db import get_db
+from urllib.parse import unquote
 
 views = Blueprint('views', __name__)
 search_bp = Blueprint('search', __name__, url_prefix='/search')
@@ -19,27 +20,20 @@ def search_name():
         db = get_db()
         cursor = db.cursor()
         name_query = """
-            SELECT * FROM ankara
-            WHERE name LIKE %s
-            UNION
-            SELECT * FROM cyprus
-            WHERE name LIKE %s
-            UNION
-            SELECT * FROM izmir
-            WHERE name LIKE %s
-            UNION
-            SELECT * FROM kocaeli
-            WHERE name LIKE %s
+            SELECT * FROM Doctors
+            WHERE Name LIKE %s
         """
 
-        cursor.execute(name_query, ('%' + name_term + '%',) * 4)
+        cursor.execute(name_query, ('%' + name_term + '%',))
         results = cursor.fetchall()
-
-        # Render the search results template with the retrieved results
-        return render_template('search.html', results=results)
+        columns = [column[0] for column in cursor.description]
+        results_list = [dict(zip(columns, row)) for row in results]
     
-    # If the request method is GET, render the search page template
-    return render_template('search.html')
+   # Return the results as JSON
+        return jsonify(results_list)
+
+    # If the request method is GET, return an empty JSON array
+    return jsonify([])
 
 
 @views.route('/search_location', methods=['GET', 'POST'])
@@ -48,28 +42,21 @@ def search_location():
         location_term = request.form['location_term']
         db = get_db()
         cursor = db.cursor()
-        location_query = """
-            SELECT * FROM ankara
-            WHERE location LIKE %s
-            UNION
-            SELECT * FROM cyprus
-            WHERE location LIKE %s
-            UNION
-            SELECT * FROM izmir
-            WHERE location LIKE %s
-            UNION
-            SELECT * FROM kocaeli
-            WHERE location LIKE %s
+        location_query ="""
+            SELECT * FROM Doctors
+            WHERE Location LIKE %s
         """
 
-        cursor.execute(location_query, ('%' + location_term + '%',) * 4)
+        cursor.execute(location_query, ('%' + location_term + '%',))
         results = cursor.fetchall()
-
-        # Render the search results template with the retrieved results
-        return render_template('search.html', results=results)
+        columns = [column[0] for column in cursor.description]
+        results_list = [dict(zip(columns, row)) for row in results]
     
-    # If the request method is GET, render the search page template
-    return render_template('search.html')
+   # Return the results as JSON
+        return jsonify(results_list)
+
+    # If the request method is GET, return an empty JSON array
+    return jsonify([])
 
 
 @views.route('/search_specialty', methods=['GET', 'POST'])
@@ -79,27 +66,20 @@ def search_specialty():
         db = get_db()
         cursor = db.cursor()
         specialty_query = """
-            SELECT * FROM ankara
-            WHERE specialty LIKE %s
-            UNION
-            SELECT * FROM cyprus
-            WHERE specialty LIKE %s
-            UNION
-            SELECT * FROM izmir
-            WHERE specialty LIKE %s
-            UNION
-            SELECT * FROM kocaeli
-            WHERE specialty LIKE %s
+            SELECT * FROM Doctors
+            WHERE Specialty LIKE %s
         """
 
-        cursor.execute(specialty_query, ('%' + specialty_term + '%',) * 4)
+        cursor.execute(specialty_query, ('%' + specialty_term + '%',))
         results = cursor.fetchall()
-
-        # Render the search results template with the retrieved results
-        return render_template('search.html', results=results)
+        columns = [column[0] for column in cursor.description]
+        results_list = [dict(zip(columns, row)) for row in results]
     
-    # If the request method is GET, render the search page template
-    return render_template('search.html')
+   # Return the results as JSON
+        return jsonify(results_list)
+
+    # If the request method is GET, return an empty JSON array
+    return jsonify([])
 
 @views.route('/search_hospital', methods=['GET', 'POST'])
 def search_hospital():
@@ -108,24 +88,53 @@ def search_hospital():
         db = get_db()
         cursor = db.cursor()
         hospital_query = """
-            SELECT * FROM ankara
-            WHERE hospital LIKE %s
-            UNION
-            SELECT * FROM cyprus
-            WHERE hospital LIKE %s
-            UNION
-            SELECT * FROM izmir
-            WHERE hospital LIKE %s
-            UNION
-            SELECT * FROM kocaeli
-            WHERE hospital LIKE %s
+            SELECT * FROM Doctors
+            WHERE Hospital LIKE %s
         """
 
-        cursor.execute(hospital_query, ('%' + hospital_term + '%',) * 4)
+        cursor.execute(hospital_query, ('%' + hospital_term + '%',))
         results = cursor.fetchall()
-
-        # Render the search results template with the retrieved results
-        return render_template('search.html', results=results)
+        columns = [column[0] for column in cursor.description]
+        results_list = [dict(zip(columns, row)) for row in results]
     
-    # If the request method is GET, render the search page template
-    return render_template('search.html')
+   # Return the results as JSON
+        return jsonify(results_list)
+
+    # If the request method is GET, return an empty JSON array
+    return jsonify([])
+
+
+
+# Add this import at the top of your views.py
+
+
+# Add this route below your existing search_* routes
+@views.route('/search_doctors', methods=['GET', 'POST'])
+def search_doctors():
+    search_term = request.args.get('search', '')
+    location_term = request.args.get('location', '')
+    id_term = request.args.get('id', None)
+
+    db = get_db()
+    cursor = db.cursor()
+
+    if id_term is not None:
+        query = """
+            SELECT * FROM Doctors
+            WHERE ID = %s
+        """
+        cursor.execute(query, (id_term,))
+    else:
+        query = """
+            SELECT * FROM Doctors
+            WHERE (Name LIKE %s OR Specialty LIKE %s OR Hospital LIKE %s)
+            AND Location LIKE %s
+        """
+
+        cursor.execute(query, ('%' + search_term + '%', '%' + search_term + '%', '%' + search_term + '%', '%' + location_term + '%'))
+
+    results = cursor.fetchall()
+    columns = [column[0] for column in cursor.description]
+    results_list = [dict(zip(columns, row)) for row in results]
+
+    return jsonify(results_list)

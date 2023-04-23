@@ -23,12 +23,3 @@ def close_db(e=None):
     if db is not None:
         db.close()
 
-
-def init_db():
-    db = get_db()
-    cursor = db.cursor()
-    with current_app.open_resource('schema.sql') as f:
-        # Create the tables defined in the schema.sql file
-        queries = f.read().decode('utf8').split(';')
-        for query in queries:
-            cursor().execute(query)

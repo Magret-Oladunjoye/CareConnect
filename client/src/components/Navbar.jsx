@@ -3,14 +3,24 @@ import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
 import logo from "../images/logo.png";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-scroll";
+import { useAuth } from "../AuthContext";
 
 const Navbar = () => {
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
   let navigate = useNavigate();
   const [nav, setNav] = useState(false);
 
   const handleNav = () => {
     setNav(!nav);
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    setIsLoggedIn(false); // Add this line
+    navigate("/auth/login");
+  };
+  
 
   return (
     <div className="flex justify-between items-center h-24 w-screen mx-auto px-4 bg-sky-100 drop-shadow-lg">
@@ -28,7 +38,7 @@ const Navbar = () => {
       <ul className="invisible md:visible md:flex text-900 font-semibold">
         <li
           onClick={() => {
-            navigate("/home");
+            navigate("/");
           }}
           className="p-4 hover:cursor-pointer"
         >
@@ -53,21 +63,41 @@ const Navbar = () => {
             Resources
           </Link>
         </li>
-        <button
-          onClick={() => {
-            navigate("/auth/login");
-          }}
-          type="button"
-          className="text-white font-semibold bg-800 hover:text-white border border-900 hover:bg-700 rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 drop-shadow-xl"
-        >
-          Sign In
-        </button>
+        {localStorage.getItem("access_token") ? (
+          <>
+            <li
+              onClick={() => {
+                navigate("/auth/profile");
+              }}
+              className="p-4 hover:cursor-pointer"
+            >
+              Profile
+            </li>
+            <button
+              onClick={handleLogout}
+              type="button"
+              className="text-white font-semibold bg-red-600 hover:text-white border border-red-600 hover:bg-red-700 rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 drop-shadow-xl"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => {
+              navigate("/auth/login");
+            }}
+            type="button"
+            className="text-white font-semibold bg-800 hover:text-white border border-900 hover:bg-700 rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 drop-shadow-xl"
+          >
+            Sign In
+          </button>
+        )}
       </ul>
       <div onClick={handleNav} className="block md:hidden">
         {nav ? (
-          <AiOutlineClose size={20} svg class="fill-black" />
+          <AiOutlineClose size={20} svg className="fill-black" />
         ) : (
-          <AiOutlineMenu size={20} svg class="fill-black" />
+          <AiOutlineMenu size={20} svg className="fill-black" />
         )}
       </div>
       <div

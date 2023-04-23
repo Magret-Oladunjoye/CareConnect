@@ -1,44 +1,40 @@
-// signup.jsx
 import { useState } from "react";
 import logo from "../images/logo.png";
-
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const [redirectToSignup, setRedirectToSignup] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    fetch("http://127.0.0.1:5000/auth/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: name, email: email, password: password }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        // handle successful signup
-        console.log(data);
-        // set JWT access token to local storage
-        localStorage.setItem("token", data.token);
-      })
-      .catch((error) => {
-        console.log(error);
+    try {
+      const response = await fetch("/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: name, email: email, password: password }),
       });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("access_token", data.access_token);
+        navigate("/home");
+      } else {
+        setError(data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      setError("Something went wrong. Please try again.");
+    }
   };
 
   return (
-    <div className="bg-white text-black rounded-2xl shadow-2xl  flex flex-col w-full  md:w-1/3 items-center max-w-4xl transition duration-1000 ease-in">
+    <div className="bg-white text-black rounded-2xl shadow-2xl flex flex-col w-full md:w-1/3 items-center max-w-4xl transition duration-1000 ease-in">
       <header className="px-4 py-2">
         <img src={logo} width="250" alt="Logo" />
       </header>
@@ -77,7 +73,8 @@ const Signup = () => {
       {error && <p>{error}</p>}
       <div className="inline-block border-[1px] justify-center w-20 border-600 border-solid"></div>
       <p className="text-600 mt-4 text-sm">Already have an account?</p>
-      <a href="/auth/login"
+      <a
+ href="/auth/login"
           className="text-600 mb-4 text-sm font-medium cursor-pointer underline"
           
         >

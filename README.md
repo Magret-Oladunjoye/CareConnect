@@ -1,6 +1,6 @@
 # CareConnect - Doctor Finder Web Application
 
-![CareConnect](./screenshot.png)
+![CareConnect]
 
 **CareConnect** is an ongoing web application project that aims to help users find doctors based on specialty, location, and other criteria. It provides a user-friendly interface for searching and exploring doctors, viewing their profiles, and accessing important information such as their specialties, work experience, and offered treatments.
 
@@ -45,7 +45,12 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Acknowledgements
 
-- Special thanks to the developers and contributors of the libraries and frameworks used in this project.
+Special thanks to the following team members of my graduation project:
+- Hazal
+- Norbert
+- Ahmed
+
+Special thanks to the developers and contributors of the libraries and frameworks used in this project.
 - Icon credits: [Font Awesome](https://fontawesome.com/)
 
 ## Contact

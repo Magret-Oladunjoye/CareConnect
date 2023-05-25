@@ -20,7 +20,6 @@ const Navbar = () => {
     setIsLoggedIn(false); // Add this line
     navigate("/auth/login");
   };
-  
 
   return (
     <div className="flex justify-between items-center h-24 w-screen mx-auto px-4 bg-sky-100 drop-shadow-lg">
@@ -36,20 +35,25 @@ const Navbar = () => {
       </header>
 
       <ul className="invisible md:visible md:flex text-900 font-semibold">
-        <li
+        <li className="p-4 hover:cursor-pointer">
+        
+          <Link 
+          
           onClick={() => {
             navigate("/");
           }}
-          className="p-4 hover:cursor-pointer"
-        >
-          Home
+          className="hover:cursor-pointer"
+          >Home</Link>
         </li>
+
         <li className="p-4 hover:cursor-pointer">
           <Link
             onClick={() => {
-              navigate("/about");
+              const footerElement = document.getElementById("footer");
+              if (footerElement) {
+                footerElement.scrollIntoView({ behavior: "smooth" });
+              }
             }}
-            to="about"
             spy={true}
             smooth={true}
             offset={50}
@@ -58,13 +62,26 @@ const Navbar = () => {
             About
           </Link>
         </li>
+
         <li className="p-4 hover:cursor-pointer">
           <Link to="footer" spy={true} smooth={true} offset={50} duration={500}>
             Resources
           </Link>
         </li>
-        {localStorage.getItem("access_token") ? (
-          <>
+
+        {localStorage.getItem("is_admin") === 'true' && (
+          <li
+            onClick={() => {
+              navigate("/admin/doctor_claims");
+            }}
+            className="p-4 hover:cursor-pointer"
+          >
+            Admin Dashboard
+          </li>
+        )}
+
+        {localStorage.getItem("access_token") && (
+          <React.Fragment>
             <li
               onClick={() => {
                 navigate("/auth/profile");
@@ -80,8 +97,10 @@ const Navbar = () => {
             >
               Logout
             </button>
-          </>
-        ) : (
+          </React.Fragment>
+        )}
+
+        {!localStorage.getItem("access_token") && (
           <button
             onClick={() => {
               navigate("/auth/login");
@@ -114,7 +133,7 @@ const Navbar = () => {
         <ul className="uppercase p-4 bg-700">
           <li
             onClick={() => {
-              navigate("/home");
+              navigate("/");
             }}
             className="p-4 border-b border-900 text-black hover:cursor-pointer"
           >
@@ -122,7 +141,10 @@ const Navbar = () => {
           </li>
           <li
             onClick={() => {
-              navigate("/");
+              const footerElement = document.getElementById("footer");
+              if (footerElement) {
+                footerElement.scrollIntoView({ behavior: "smooth" });
+              }
             }}
             className="p-4 border-b border-900 text-black hover:cursor-pointer"
           >
@@ -137,6 +159,16 @@ const Navbar = () => {
           >
             Login
           </li>
+          {localStorage.getItem("is_admin") === 'true' && (
+            <li
+              onClick={() => {
+                navigate("/admin/doctor_claims");
+              }}
+              className="p-4 hover:cursor-pointer"
+            >
+              Admin Dashboard
+            </li>
+          )}
         </ul>
       </div>
     </div>

@@ -21,7 +21,7 @@ const Hero = () => {
           Get honest and transparent information, ratings, and reviews on your
           healthcare providers
         </p>
-        <SearchBar></SearchBar>
+        <SearchBar />
       </div>
     </div>
   );

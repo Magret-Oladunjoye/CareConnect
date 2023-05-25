@@ -33,8 +33,9 @@ const LoginForm = ({ navigate, redirectToSignup, setRedirectToSignup }) => {
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);
         localStorage.setItem("username", data.username);
-        setIsLoggedIn(true); // Set isLoggedIn to true
-        navigate("/"); // Redirect to home component
+        localStorage.setItem("is_admin", data.is_admin); // store is_admin value
+        setIsLoggedIn(true);
+        navigate("/");
       } else {
         setErrorMessage(data.message);
       }
@@ -43,6 +44,7 @@ const LoginForm = ({ navigate, redirectToSignup, setRedirectToSignup }) => {
       setErrorMessage("Something went wrong. Please try again later.");
     }
   };
+
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");

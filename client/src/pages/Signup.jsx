@@ -1,8 +1,10 @@
 import { useState } from "react";
 import logo from "../images/logo.png";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
-const Signup = () => {
+const SignupForm = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -40,7 +42,7 @@ const Signup = () => {
       </header>
 
       <div className="inline-block border-[1px] justify-center w-20 border-600 border-solid"></div>
-      <h3 className="text-xl font-light text-black pt-2">Create Account</h3>
+      <h3 className="text-xl font-light text-black pt-2">Create Your Account</h3>
 
       {/* Inputs */}
       <form className="flex flex-col items-center justify-center mt-2" onSubmit={handleSubmit}>
@@ -74,16 +76,37 @@ const Signup = () => {
       <div className="inline-block border-[1px] justify-center w-20 border-600 border-solid"></div>
       <p className="text-600 mt-4 text-sm">Already have an account?</p>
       <a
- href="/auth/login"
-          className="text-600 mb-4 text-sm font-medium cursor-pointer underline"
-          
-        >
+        href="/auth/login"
+        className="text-600 mb-4 text-sm font-medium cursor-pointer underline"
+      >
         Sign in to your account
       </a>
     </div>
   );
 };
 
+const Signup = () => {
+  const navigate = useNavigate();
 
+  return (
+    <div>
+      <Navbar />
+      <div className="py-28 mb-28">
+        <main className="flex items-center w-full md:px-20">
+          <div className="hidden md:inline-flex flex-col flex-1 space-y-1">
+            <header className="px-4 py-2">
+              <img src={logo} width="250" alt="Logo" />
+            </header>
+            <p className="font-light text-lg leading-1 text-black">
+              Get honest and transparent information, ratings, and reviews on your healthcare providers
+            </p>
+          </div>
+          <SignupForm />
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+};
 
 export default Signup;

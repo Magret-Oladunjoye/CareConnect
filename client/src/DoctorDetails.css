@@ -1,0 +1,23 @@
+.doctor-details {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+  
+  .doctor-details__image {
+    width: 200px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+  }
+  
+  .doctor-details__heading {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    font-weight: normal;
+  }
+  
+  .doctor-details__text {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  

@@ -109,32 +109,44 @@ def search_hospital():
 
 
 # Add this route below your existing search_* routes
-@views.route('/search_doctors', methods=['GET', 'POST'])
+@views.route('/search_doctors', methods=['POST', 'GET'])
 def search_doctors():
-    search_term = request.args.get('search', '')
-    location_term = request.args.get('location', '')
-    id_term = request.args.get('id', None)
+    data = request.get_json()
+    name_term = data.get('name_term', '')
+    location_term = data.get('location_term', '')
 
     db = get_db()
     cursor = db.cursor()
 
-    if id_term is not None:
-        query = """
-            SELECT * FROM Doctors
-            WHERE ID = %s
-        """
-        cursor.execute(query, (id_term,))
-    else:
-        query = """
-            SELECT * FROM Doctors
-            WHERE (Name LIKE %s OR Specialty LIKE %s OR Hospital LIKE %s)
-            AND Location LIKE %s
-        """
+    query = """
+        SELECT * FROM Doctors
+        WHERE (Name LIKE %s OR Specialty LIKE %s OR Hospital LIKE %s)
+        AND Location LIKE %s
+    """
 
-        cursor.execute(query, ('%' + search_term + '%', '%' + search_term + '%', '%' + search_term + '%', '%' + location_term + '%'))
+    cursor.execute(query, ('%' + name_term + '%', '%' + name_term + '%', '%' + name_term + '%', '%' + location_term + '%'))
 
     results = cursor.fetchall()
     columns = [column[0] for column in cursor.description]
     results_list = [dict(zip(columns, row)) for row in results]
 
     return jsonify(results_list)
+
+
+@views.route('/search_doctor/<id>', methods=['POST', 'GET'])
+def search_doctor(id):
+    db = get_db()
+    cursor = db.cursor()
+
+    query = """
+        SELECT * FROM Doctors
+        WHERE ID=%s
+    """
+
+    cursor.execute(query, (id,))
+
+    result = cursor.fetchone()
+    columns = [column[0] for column in cursor.description]
+    result_dict = dict(zip(columns, result))
+
+    return jsonify(result_dict)

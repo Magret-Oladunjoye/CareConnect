@@ -11,7 +11,7 @@ import { SearchProvider } from "../SearchContext";
 const Home = () => {
 
   return (
-    <SearchProvider>
+    <>
       <Navbar />
       <Hero />
       <hr></hr>
@@ -20,7 +20,7 @@ const Home = () => {
       <About />
       <hr></hr>
       <Footer />
-    </SearchProvider>
+    </>
   );
 };
 

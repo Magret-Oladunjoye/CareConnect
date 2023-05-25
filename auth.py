@@ -2,7 +2,7 @@ import json
 import logging
 from flask_cors import cross_origin
 from flask_restful import Resource, reqparse
-from models import Users, db
+from models import DoctorClaimRequest, Users, db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import (
     JWTManager,
@@ -16,7 +16,7 @@ from flask import Flask, jsonify, make_response, request
 import traceback
 import logging
 logging.basicConfig(level=logging.DEBUG)
-
+from models import Doctors
 # Removed Namespace import and signup_model, login_model, profile_model
 
 # Create request parsers for the POST requests
@@ -37,8 +37,19 @@ update_profile_parser.add_argument("address", type=str, required=False)
 update_profile_parser.add_argument("date_of_birth", type=str, required=False)
 update_profile_parser.add_argument("gender", type=str, required=False)
 
+
+
+claim_parser = reqparse.RequestParser()
+claim_parser.add_argument("doctor_id", type=int, required=True, help="Doctor ID is required")
+claim_parser.add_argument("full_name", type=str, required=True, help="Full name is required")
+claim_parser.add_argument("email", type=str, required=True, help="Email is required")
+claim_parser.add_argument("phone_number", type=str, required=True, help="Phone number is required")
+claim_parser.add_argument("professional_id", type=str, required=True, help="Professional ID is required")
+claim_parser.add_argument("document", type=str, required=True, help="Document is required")
+
+
 class SignUp(Resource):
-    @jwt_required()
+    
     def post(self):
         data = signup_parser.parse_args()
 
@@ -48,10 +59,14 @@ class SignUp(Resource):
         if db_user is not None:
             return jsonify({"message": f"User with username {username} already exists"})
 
+        # Check if the user is the first user (admin)
+        is_admin = Users.query.count() == 0
+
         new_user = Users(
             username=data.get("username"),
             email=data.get("email"),
             password=generate_password_hash(data.get("password")),
+            is_admin=is_admin,
         )
 
         new_user.save()
@@ -75,9 +90,15 @@ class Login(Resource):
         if db_user and check_password_hash(db_user.password, password):
             access_token = create_access_token(identity=db_user.username)
             refresh_token = create_refresh_token(identity=db_user.username)
-            return make_response(jsonify({"username": db_user.username, "access_token": access_token, "refresh_token": refresh_token}), 200)
+            return make_response(jsonify({
+                "username": db_user.username, 
+                "is_admin": db_user.is_admin,
+                "access_token": access_token, 
+                "refresh_token": refresh_token
+            }), 200)
         else:
             return make_response(jsonify({"message": "Invalid email or password"}), 401)
+
 
 
 class Profile(Resource):
@@ -130,6 +151,33 @@ class UpdateProfile(Resource):
         return {"message": "User profile updated successfully"}, 200
 
 
+class DoctorClaim(Resource):
+    def post(self):
+        data = claim_parser.parse_args()
+
+        doctor_id = data.get("doctor_id")
+        doctor = Doctors.query.get(doctor_id)
+
+        if doctor is None:
+            return {"message": "Doctor with the given ID does not exist"}, 404
+
+        # Process the doctor claim request
+        # You may want to store the claim request in a separate table or a queue for admin review
+
+        # For example, you can create a new DoctorClaimRequest model and save the request
+        new_claim = DoctorClaimRequest(
+            doctor_id=data.get("doctor_id"),
+            full_name=data.get("full_name"),
+            email=data.get("email"),
+            phone_number=data.get("phone_number"),
+            professional_id=data.get("professional_id"),
+            document=data.get("document"),
+        )
+
+        new_claim.save()
+
+        return make_response(jsonify({"message": "Doctor claim request submitted successfully"}), 201)
+
 
 class RefreshResource(Resource):
     @jwt_required()
@@ -140,6 +188,54 @@ class RefreshResource(Resource):
         new_access_token = create_access_token(identity=current_user)
 
         return make_response(jsonify({"access_token": new_access_token}), 200)
+
+# auth.py
+
+
+
+class AdminDoctorClaim(Resource):
+    @jwt_required()
+    def get(self):
+        try:
+            current_user = get_jwt_identity()
+            user = Users.query.filter_by(username=current_user).first()
+
+            if not user.is_admin:
+                return {"message": "Unauthorized access"}, 401
+
+            claims = DoctorClaimRequest.query.all()
+            claim_list = [claim.to_dict() for claim in claims]
+            return jsonify({"data": claim_list})
+        except Exception as e:
+            app.logger.error(f"Failed to get doctor claims: {str(e)}")
+            return {"message": "Internal Server Error"}, 500
+    
+    
+
+    @jwt_required()
+    def put(self, claim_id):
+        current_user = get_jwt_identity()
+        user = Users.query.filter_by(username=current_user).first()
+
+        # Ensure the current user is an admin
+        if not user.is_admin:
+            return {"message": "Unauthorized access"}, 401
+
+        claim = DoctorClaimRequest.query.get(claim_id)
+        if not claim:
+            return {"message": "Claim not found"}, 404
+
+        data = request.get_json()
+
+        status = data.get('status')
+        if status not in ['approved', 'rejected']:
+            return {"message": "Invalid status value"}, 400
+
+        claim.status = status
+        db.session.commit()
+
+        return {"message": f"Claim {claim_id} updated to {status}"}, 200
+
 
 
 def handle_type_error(e):

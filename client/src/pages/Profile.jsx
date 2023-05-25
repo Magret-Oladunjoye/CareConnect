@@ -155,7 +155,7 @@ const Profile = () => {
               </button>
               <button
                 onClick={() => {
-                  navigate("/home");
+                  navigate("/");
                 }}
                 type="button"
                 className="text-white font-semibold bg-800 hover:text-white border border-900 hover:bg-700 rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 drop-shadow-xl"

@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-const SearchContext = createContext();
+export const SearchContext = createContext();
 
 export const useSearch = () => {
   return useContext(SearchContext);
@@ -8,22 +8,38 @@ export const useSearch = () => {
 
 export const SearchProvider = ({ children }) => {
   const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(false);
+    
+  useEffect(() => {
+    const storedDoctors = localStorage.getItem("doctors");
+    if (storedDoctors) {
+      setDoctors(JSON.parse(storedDoctors));
+    }
+  }, []);
 
-  const handleSearch = async (name, location) => {
-    const response = await fetch("/search_doctors", {
+  useEffect(() => {
+    localStorage.setItem("doctors", JSON.stringify(doctors));
+  }, [doctors]);
+
+  const handleSearch = (name, location) => {
+    setLoading(true);
+    return fetch("/search_doctors", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ name_term: name, location_term: location }),
-    });
-
-    const data = await response.json();
-    setDoctors(data);
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Data fetched in SearchProvider:", data);
+        setDoctors(data);
+        setLoading(false);
+        return data;
+      });
   };
-
   return (
-    <SearchContext.Provider value={{ doctors, setDoctors, handleSearch }}>
+    <SearchContext.Provider value={{ doctors, setDoctors, handleSearch, loading }}>
       {children}
     </SearchContext.Provider>
   );

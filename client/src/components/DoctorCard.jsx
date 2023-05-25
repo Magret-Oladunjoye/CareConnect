@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from "../components/Navbar";
 
 const DoctorCard = ({ doctor }) => {
   const {
@@ -11,6 +12,7 @@ const DoctorCard = ({ doctor }) => {
   } = doctor;
 
   return (
+    
     <div className="doctor-card">
       <img src={Image_Src} alt={`Dr. ${Name}`} />
       <h3>{Name}</h3>

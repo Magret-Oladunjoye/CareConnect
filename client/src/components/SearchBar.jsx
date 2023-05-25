@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSearch } from "../SearchContext";
 
 const SearchBar = () => {
-  const { handleSearch } = useSearch();
+  const { handleSearch, doctors} = useSearch();
   const [searchTerm, setSearchTerm] = useState("");
   const [locationTerm, setLocationTerm] = useState("");
   const navigate = useNavigate();

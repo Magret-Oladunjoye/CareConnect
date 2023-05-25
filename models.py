@@ -23,7 +23,39 @@ class Doctors(db.Model):
     def __repr__(self):
         return f"Doctor('{self.name}', '{self.specialty}')"
 
+ # models.py
+
+class DoctorClaimRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.ID'))  # Foreign key for doctors table
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # Foreign key for users table
+    user = db.relationship('Users', backref=db.backref('doctor_claim_requests', lazy=True))
+    doctor = db.relationship('Doctors', backref=db.backref('doctor_claim_requests', lazy=True))
+    full_name = db.Column(db.String(100))
+    email = db.Column(db.String(100))
+    phone_number = db.Column(db.String(20))
+    professional_id = db.Column(db.String(100))
+    document = db.Column(db.String(200))  # Path to the uploaded document
+    status = db.Column(db.String(20), default="pending")  # pending, approved, rejected
     
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "doctor_id": self.doctor_id,
+            "user_id": self.user_id,
+            "full_name": self.full_name,
+            "email": self.email,
+            "phone_number": self.phone_number,
+            "professional_id": self.professional_id,
+            "document": self.document,
+            "status": self.status
+        }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+   
 
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -34,6 +66,7 @@ class Users(db.Model):
     address = db.Column(db.String(80), nullable=True, default="")
     date_of_birth = db.Column(db.Date(), nullable=True, default=None)
     gender = db.Column(db.String(10), nullable=True, default="")
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)
     
     def to_dict(self):
         return {

@@ -1,49 +1,58 @@
-# Flask + ReactJS Recipes
-This is a series of videos in which I talk about full stack web application development using Python Flask and the ReactJS library.
+# CareConnect - Doctor Finder Web Application
 
+![CareConnect]
 
-## About the project
-The project is a simple recipe app that allows simple CRUD actions against a Flask REST API.
+**CareConnect** is an ongoing web application project that aims to help users find doctors based on specialty, location, and other criteria. It provides a user-friendly interface for searching and exploring doctors, viewing their profiles, and accessing important information such as their specialties, work experience, and offered treatments.
 
+## Features
 
+- **Search Doctors:** Easily search for doctors based on specialty, location, or other criteria.
+- **Doctor Profiles:** View detailed profiles of doctors including their name, specialty, hospital, location, special interests, and treatments offered.
+- **User Authentication:** Sign up and log in to access personalized features such as saving favorite doctors and leaving reviews.
+- **Claim Profile:** Doctors can claim their profiles and provide additional information about their practice.
+- **Admin Dashboard:** Admins have access to an admin dashboard to manage doctor claims and perform administrative tasks.
+- **Responsive Design:** The application is optimized for various devices and screen sizes.
 
-## What to cover
+## Technologies Used
 
-### Backend Development
-- Creating REST APIs with Flask with Flask-RestX
-- Using Flask-SQLAlchemy ORM
-- Carrying Out Database Migrations with Flask-Migrate
-- JWT Authentication with Flask-JWT-Extended
-- Testing Flask API with Unittest
+- React: JavaScript library for building user interfaces.
+- React Router: Library for handling routing within the application.
+- CSS: Styling the user interface.
+- Node.js: JavaScript runtime environment.
+- Express.js: Web application framework for Node.js.
+- MySQL: Relational database management system for storing doctor and user information.
+- Sequelize: Promise-based ORM for Node.js, used for database interactions.
+- RESTful API: API endpoints for retrieving and updating doctor information.
+- Authentication: Secure user authentication using JWT (JSON Web Tokens).
+- GitHub: Version control and project management.
 
-### Frontend Development
-- Creating React Components
-- React Hooks
-- React Hooks
-- JWT Authentication on the frontend
-- Making API Calls with Fetch API
+## Installation and Usage
 
+1. Clone the repository: `git clone https://github.com/your-username/care-connect.git`
+2. Install dependencies: `npm install`
+3. Set up the MySQL database and configure the connection in the `.env` file.
+4. Run database migrations: `npx sequelize-cli db:migrate`
+5. Start the server: `npm start`
+6. Open the application in your web browser: `http://localhost:3000`
 
-## Video Playlist
-[Build a Full stack web app with Flask and ReactJS](https://www.youtube.com/playlist?list=PLEt8Tae2spYkfEYQnKxQ4vrOULAnMI1iF) 
+## Contributing
 
-## Live Demo On Render.com
-[View The project here](https://flask-react-recipes.onrender.com/signup)
+Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request. Make sure to follow the project's code of conduct.
 
+## License
 
-# To run this project
-1. Clone the Git repository
-2. In the root folder, create a virtual environment using your favorite method.
-3. Install project dependencies with  
-``
-pip install -r requirements.txt
-``
-4. Run project with 
-``
-python run.py
-``
-5. Run test
-``
-pytest
-``
+This project is licensed under the [MIT License](LICENSE).
 
+## Acknowledgements
+
+Special thanks to my fellow team members:
+- Hazal
+- Norbert
+- Ahmed
+
+Special thanks to the developers and contributors of the libraries and frameworks used in this project.
+- Icon credits: [Font Awesome](https://fontawesome.com/)
+
+## Contact
+
+For any questions or inquiries, please contact Magret Oladunjoye at magretoladunjoye9@gmail.com.

@@ -1,7 +1,7 @@
 
 #models.py file is used to define the data models for your application.
 # In other words, it describes how the data will be structured in your Python
-# code and how it will interact with the database.
+# code aand how it will interact with the database.
 
 from database import db
 from flask_sqlalchemy import SQLAlchemy

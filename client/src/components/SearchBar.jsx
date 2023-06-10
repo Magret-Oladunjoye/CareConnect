@@ -1,47 +1,82 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearch } from "../SearchContext";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "../AuthContext";
 
 const SearchBar = () => {
-  const { handleSearch, doctors} = useSearch();
+  const { t } = useTranslation();
+  const { handleSearch, doctors } = useSearch();
   const [searchTerm, setSearchTerm] = useState("");
   const [locationTerm, setLocationTerm] = useState("");
   const navigate = useNavigate();
-  
+  // Retrieve the user's username from the local storage
+  const username = localStorage.getItem("username");
 
   const handleSearchClick = async (e) => {
-      e.preventDefault(); // Prevent the default behavior of the button click
-      console.log("handleSearch function", handleSearch);
+    e.preventDefault(); // Prevent the default behavior of the button click
 
-      // Fetch doctors based on searchTerm and locationTerm
-      const data = await handleSearch(searchTerm, locationTerm);
+    // Fetch doctors based on searchTerm and locationTerm
+    const data = await handleSearch(searchTerm, locationTerm);
 
-      console.log("data", data); // Check if the fetched data is correct
 
-      navigate("/search_doctors");
-};
+    // Save search history only if the data is fetched successfully
+    if (data) {
+      const searchHistoryData = {
+        username: username,
+        searchTerm: searchTerm,
+        locationTerm: locationTerm,
+      };
+
+      saveSearchHistory(searchHistoryData);
+    }
+
+    navigate("/search_doctors");
+  };
+
+  const saveSearchHistory = async (data) => {
+    try {
+      console.log(data)
+      const response = await fetch("/api/save_search_history", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        console.log("Search history saved successfully");
+      } else {
+        console.error("Failed to save search history:", response.status);
+      }
+    } catch (error) {
+      console.error("Error saving search history:", error);
+    }
+  };
 
   return (
     <div className="">
       {/* Search bar */}
       <div className="justify-center flex flex-col md:flex-row">
         <label className="w-[60%] md:w-auto bg-gray-200 border border-gray-300 text-gray-500 font-sans shadow-xl rounded-sm px-4 py-2 mx-auto">
-          SEARCH
+          {t("SEARCH")}
         </label>
         <input
           type="text"
           className="block w-[60%] mx-auto px-4 py-2 bg-white border shadow-xl focus:border-cyan-400 focus:ring-cyan-300 focus:outline-none focus:ring focus:ring-opacity-40"
-          placeholder="Doctor, Specialty"
+          placeholder={t("Doctor, Specialty")}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <label className="w-[60%] md:w-auto bg-gray-200 border border-gray-300 text-gray-500 font-sans shadow-xl rounded-sm px-4 py-2 mx-auto">
-          NEAR
+          {t("NEAR")}
         </label>
         <input
           type="text"
           className="block w-[60%] mx-auto px-4 py-2 bg-white border shadow-xl focus:border-cyan-400 focus:ring-cyan-300 focus:outline-none focus:ring focus:ring-opacity-40"
-          placeholder="Country, City"
+          placeholder={t("Country, City")}
           value={locationTerm}
           onChange={(e) => setLocationTerm(e.target.value)}
         />
@@ -72,4 +107,3 @@ const SearchBar = () => {
 };
 
 export default SearchBar;
-

@@ -1,7 +1,9 @@
 import React from "react";
 import SearchBar from "./SearchBar";
+import { useTranslation } from "react-i18next";
 
 const Hero = () => {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -15,11 +17,10 @@ const Hero = () => {
     >
       <div className="max-w-[70%] mx-auto text-center flex flex-col justify-center py-12">
         <h1 className="mt-2 text-3xl font-bold drop-shadow-lg">
-          Find, Compare, and Review Doctors
+        {t("Find, Compare, and Review Doctors")}
         </h1>
         <p className="text-xl m-4 font-light drop-shadow-lg">
-          Get honest and transparent information, ratings, and reviews on your
-          healthcare providers
+          {t("Get honest and transparent information, ratings, and reviews on your healthcare providers")}
         </p>
         <SearchBar />
       </div>

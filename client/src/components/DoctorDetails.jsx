@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import "../DoctorDetails.css";
+import ProfileBanner from './ProfileBanner';
+import InfoTabs from './InfoTabs';
+import CommentSection from "../components/CommentSection";
+import Navbar from "../components/Navbar";
 
 const DoctorDetails = () => {
   const { id } = useParams();
@@ -37,26 +41,30 @@ const DoctorDetails = () => {
     Treatments_Offered,
     Work_Experience,
     Image_Src,
+    Contact,
   } = doctor;
 
   return (
     <div className="doctor-details">
-      <img src={Image_Src} alt={`${Name}`} className="doctor-details__image" />
-      <h2 className="doctor-details__heading">{Name}</h2>
-      <h2 className="doctor-details__heading">{Specialty}</h2>
-      <p>
-        Is this you? 
-        <Link to={`/claim_profile/${id}`} style={{ color: 'blue' }}>
-          Claim Profile
-        </Link>
-      </p>
-
-      <p className="doctor-details__text">About: {About}</p>
-      <p className="doctor-details__text">Hospital: {Hospital}</p>
-      <p className="doctor-details__text">Location: {Location}</p>
-      <p className="doctor-details__text">Special Interests: {Special_Interests}</p>
-      <p className="doctor-details__text">Treatments Offered: {Treatments_Offered}</p>
-      <p className="doctor-details__text">Work Experience: {Work_Experience}</p>
+      <Navbar></Navbar>
+      <ProfileBanner
+        id={id}
+        name={Name}
+        specialty={Specialty}
+        hospital={Hospital}
+        location={Location}
+        imageSrc={Image_Src}
+      />
+      <InfoTabs
+        name={Name} 
+        about={About}
+        workExperience={Work_Experience}
+        specialInterests={Special_Interests}
+        treatmentsOffered={Treatments_Offered}
+        contact={Contact}
+      />
+      <hr></hr>
+      <CommentSection></CommentSection>
     </div>
   );
 };

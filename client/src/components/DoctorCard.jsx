@@ -1,25 +1,29 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Navbar from "../components/Navbar";
+import React from "react";
+import { Link } from "react-router-dom";
 
 const DoctorCard = ({ doctor }) => {
-  const {
-    ID,
-    Name,
-    Specialty,
-    Location,
-    Image_Src,
-  } = doctor;
+  const { Name, Specialty, Location, Image_Src, Ratings } = doctor;
+
+  const doctorImageSrc = Image_Src || "/images/avatar.png";
 
   return (
-    
     <div className="doctor-card">
-      <img src={Image_Src} alt={`Dr. ${Name}`} />
-      <h3>{Name}</h3>
-      <p>Specialty: {Specialty}</p>
-      <p>Location: {Location}</p>
-      <Link to={`/doctor/${ID}`}>View Details</Link>
+      <div className="doctor-card__image">
+        <img src={doctorImageSrc} alt={`Dr. ${Name}`} />
+      </div>
+      <div className="doctor-card__info">
+        <p>{Name}</p>
+        <p>Specialty: {Specialty}</p>
+        <p>Location: {Location}</p>
+        {Ratings && (
+          <p>Average Rating: {Ratings.reduce((a, b) => a + b, 0) / Ratings.length}</p>
+        )}
+        <Link to={`/doctor/${doctor.id}`} className="doctor-card__link">
+          View Details
+        </Link>
+      </div>
     </div>
   );
 };
 
+export default DoctorCard;

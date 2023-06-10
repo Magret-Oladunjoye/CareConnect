@@ -41,11 +41,11 @@ update_profile_parser.add_argument("gender", type=str, required=False)
 
 claim_parser = reqparse.RequestParser()
 claim_parser.add_argument("doctor_id", type=int, required=True, help="Doctor ID is required")
-claim_parser.add_argument("full_name", type=str, required=True, help="Full name is required")
+claim_parser.add_argument("first_name", type=str, required=True, help="First name is required")
+claim_parser.add_argument("last_name", type=str, required=True, help="Last name is required")
 claim_parser.add_argument("email", type=str, required=True, help="Email is required")
 claim_parser.add_argument("phone_number", type=str, required=True, help="Phone number is required")
-claim_parser.add_argument("professional_id", type=str, required=True, help="Professional ID is required")
-claim_parser.add_argument("document", type=str, required=True, help="Document is required")
+
 
 
 class SignUp(Resource):
@@ -162,19 +162,17 @@ class DoctorClaim(Resource):
             return {"message": "Doctor with the given ID does not exist"}, 404
 
         # Process the doctor claim request
-        # You may want to store the claim request in a separate table or a queue for admin review
-
-        # For example, you can create a new DoctorClaimRequest model and save the request
         new_claim = DoctorClaimRequest(
             doctor_id=data.get("doctor_id"),
-            full_name=data.get("full_name"),
+            first_name=data.get("first_name"),
+            last_name=data.get("last_name"),
             email=data.get("email"),
             phone_number=data.get("phone_number"),
-            professional_id=data.get("professional_id"),
-            document=data.get("document"),
         )
 
         new_claim.save()
+        db.session.add(new_claim)
+        db.session.commit() 
 
         return make_response(jsonify({"message": "Doctor claim request submitted successfully"}), 201)
 

@@ -29,6 +29,7 @@ def upgrade():
     sa.Column('Treatments_Offered', sa.String(length=100), nullable=True),
     sa.Column('Work_Experience', sa.String(length=100), nullable=True),
     sa.Column('Image_Src', sa.String(length=100), nullable=True),
+    sa.Column('Contact', sa.String(length=100), nullable=True),
     sa.PrimaryKeyConstraint('ID')
     )
     op.drop_table('pma__recent')

@@ -4,9 +4,13 @@ import logo from "../images/logo.png";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-scroll";
 import { useAuth } from "../AuthContext";
+import { useTranslation } from "react-i18next";
+
 
 const Navbar = () => {
+  const { t } = useTranslation();
   const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const username = localStorage.getItem("username");
   let navigate = useNavigate();
   const [nav, setNav] = useState(false);
 
@@ -43,7 +47,7 @@ const Navbar = () => {
             navigate("/");
           }}
           className="hover:cursor-pointer"
-          >Home</Link>
+          >{t("Home")}</Link>
         </li>
 
         <li className="p-4 hover:cursor-pointer">
@@ -59,13 +63,13 @@ const Navbar = () => {
             offset={50}
             duration={500}
           >
-            About
+          {t("About")}
           </Link>
         </li>
 
         <li className="p-4 hover:cursor-pointer">
           <Link to="footer" spy={true} smooth={true} offset={50} duration={500}>
-            Resources
+            {t("Resources")}
           </Link>
         </li>
 
@@ -76,7 +80,7 @@ const Navbar = () => {
             }}
             className="p-4 hover:cursor-pointer"
           >
-            Admin Dashboard
+          {t("Admin Dashboard")}
           </li>
         )}
 
@@ -88,14 +92,14 @@ const Navbar = () => {
               }}
               className="p-4 hover:cursor-pointer"
             >
-              Profile
+            {t("Profile")}
             </li>
             <button
               onClick={handleLogout}
               type="button"
               className="text-white font-semibold bg-red-600 hover:text-white border border-red-600 hover:bg-red-700 rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 drop-shadow-xl"
             >
-              Logout
+            {t("Logout")}
             </button>
           </React.Fragment>
         )}

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar.jsx";
+import NavBar from "./components/NavBar.jsx";
 import Footer from "../components/Footer.jsx";
 
-const Profile = () => {
+const EditProfile = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,10 +11,13 @@ const Profile = () => {
   const [workExperience, setWorkExperience] = useState("");
   const [specialInterests, setSpecialInterests] = useState("");
   const [treatmentsOffered, setTreatmentsOffered] = useState("");
-  const [isDoctor, setIsDoctor] = useState(false); // Set to true to see doctor profile details
+
+  const [isDoctor, setIsDoctor] = useState(false); //set to true to see dr profile details
   const navigate = useNavigate();
 
+  // form submission and user context not implemented
   const handleLogout = () => {
+    // Perform logout logic here
     navigate("/login");
   };
 
@@ -24,30 +27,16 @@ const Profile = () => {
       alert("Please fill in all fields");
       return;
     }
-    // Submit form logic
   };
-
-  useEffect(() => {
-    // Check if the user is a doctor (based on your authentication/authorization logic)
-    // Set the isDoctor state to true if the user is a doctor
-    const checkDoctorStatus = () => {
-      // Perform the logic to check if the user is a doctor
-      // Example: Make an API request to fetch the user's role or check a flag in the user's data
-      const userIsDoctor = true; // Replace this with your actual logic
-      setIsDoctor(userIsDoctor);
-    };
-
-    checkDoctorStatus();
-  }, []);
-
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar></Navbar>
+      <NavBar></NavBar>
       <div className="border bg-sky-50 rounded-lg m-16 p-12 flex-grow">
-        <div className="flex flex-col text-center items-center content-center">
+        <div className="flex flex-col text-center items-center content-center ">
           <h1 className="font-bold text-2xl">Manage Account</h1>
           <p className="p-6 italic font-light">
-            Note that only Physician Profile owners are able to edit their profile details at this time.
+            Note that only Physician Profile owners are able to edit their
+            profile details at this time.
           </p>
           <form
             onSubmit={handleSubmit}
@@ -77,7 +66,7 @@ const Profile = () => {
               placeholder="********"
             />
 
-            {isDoctor && (
+            {isDoctor ? (
               <div className="text-left">
                 <br />
                 <h1 className="font-bold text-center text-xl text-gray-800">
@@ -137,8 +126,10 @@ const Profile = () => {
                   required
                 />
               </div>
+            ) : (
+              <></>
             )}
-
+            {/* this button does nothing right now, add onClick action to handle form submission */}
             <div className="flex flex-col items-center">
               <button
                 type="submit"
@@ -158,9 +149,11 @@ const Profile = () => {
           </form>
         </div>
       </div>
-      <Footer></Footer>
+      <div>
+        <Footer></Footer>
+      </div>
     </div>
   );
 };
 
-export default Profile;
+export default EditProfile;

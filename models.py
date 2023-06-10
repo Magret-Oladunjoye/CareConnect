@@ -19,6 +19,13 @@ class Doctors(db.Model):
     Treatments_Offered = db.Column(db.String(100))
     Work_Experience = db.Column(db.String(100))
     Image_Src = db.Column(db.String(100))
+    Contact = db.Column(db.String(200))
+    Insurance = db.Column(db.String(200))
+    Availability = db.Column(db.String(200))
+    Ratings = db.Column(db.String(200))
+    Comments = db.Column(db.String(100))
+   
+    
 
     def __repr__(self):
         return f"Doctor('{self.name}', '{self.specialty}')"
@@ -31,23 +38,22 @@ class DoctorClaimRequest(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # Foreign key for users table
     user = db.relationship('Users', backref=db.backref('doctor_claim_requests', lazy=True))
     doctor = db.relationship('Doctors', backref=db.backref('doctor_claim_requests', lazy=True))
-    full_name = db.Column(db.String(100))
+    first_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
     email = db.Column(db.String(100))
     phone_number = db.Column(db.String(20))
-    professional_id = db.Column(db.String(100))
-    document = db.Column(db.String(200))  # Path to the uploaded document
     status = db.Column(db.String(20), default="pending")  # pending, approved, rejected
+    
     
     def to_dict(self):
         return {
             "id": self.id,
             "doctor_id": self.doctor_id,
             "user_id": self.user_id,
-            "full_name": self.full_name,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
             "email": self.email,
             "phone_number": self.phone_number,
-            "professional_id": self.professional_id,
-            "document": self.document,
             "status": self.status
         }
 
@@ -67,6 +73,8 @@ class Users(db.Model):
     date_of_birth = db.Column(db.Date(), nullable=True, default=None)
     gender = db.Column(db.String(10), nullable=True, default="")
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    is_doctor = db.Column(db.Boolean, nullable=False, default=False)
+    search_history = db.Column(db.String(500), nullable=True, default="")
     
     def to_dict(self):
         return {
@@ -76,7 +84,8 @@ class Users(db.Model):
             "phone_number": self.phone_number,
             "address": self.address,
             "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
-            "gender": self.gender
+            "gender": self.gender,
+            "search_history": self.search_history
         }
 
     def __repr__(self):

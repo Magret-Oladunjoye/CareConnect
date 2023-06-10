@@ -25,7 +25,7 @@ const SignupForm = () => {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("access_token", data.access_token);
-        navigate("/home");
+        navigate("/");
       } else {
         setError(data.message);
       }

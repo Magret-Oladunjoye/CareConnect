@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
 import logo from "../images/logo.png";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SignUpForm from "./Signup";
+import { UserContext } from "../lib/UserContext";
 
 const LoginForm = ({ navigate, redirectToSignup, setRedirectToSignup }) => {
-  const { setIsLoggedIn } = useAuth(); // Add this line
+  const { setIsLoggedIn } = useAuth(); 
+  const { updateUser } = useContext(UserContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -34,6 +36,11 @@ const LoginForm = ({ navigate, redirectToSignup, setRedirectToSignup }) => {
         localStorage.setItem("refresh_token", data.refresh_token);
         localStorage.setItem("username", data.username);
         localStorage.setItem("is_admin", data.is_admin); // store is_admin value
+        updateUser({
+          username: data.username,
+          password: data.password
+          // other user properties...
+        });
         setIsLoggedIn(true);
         navigate("/");
       } else {

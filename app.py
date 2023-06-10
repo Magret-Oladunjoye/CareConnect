@@ -44,6 +44,7 @@ def create_app(config):
     api.add_resource(DoctorClaim, '/doctor/claim')
     api.add_resource(AdminDoctorClaim, '/admin/doctor_claims', '/admin/doctor_claims/<int:claim_id>')
 
+
     @app.route("/")
     def index():
         return app.send_static_file("index.html")

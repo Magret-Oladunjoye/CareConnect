@@ -19,6 +19,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
     FLASK_APP = 'app.py'
     FLASK_ENV = os.environ.get('FLASK_ENV') or 'development'
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
     # Database Config
     DB_HOST = 'localhost'

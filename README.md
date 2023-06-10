@@ -45,7 +45,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Acknowledgements
 
-Special thanks to the following team members of my graduation project:
+Special thanks to my fellow team members:
 - Hazal
 - Norbert
 - Ahmed

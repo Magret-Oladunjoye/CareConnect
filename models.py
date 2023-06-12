@@ -24,13 +24,29 @@ class Doctors(db.Model):
     Availability = db.Column(db.String(200))
     Ratings = db.Column(db.String(200))
     Comments = db.Column(db.String(100))
-   
-    
+
+    def to_dict(self):
+        return {
+            "ID": self.ID,
+            "Name": self.Name,
+            "Specialty": self.Specialty,
+            "About": self.About,
+            "Hospital": self.Hospital,
+            "Location": self.Location,
+            "Special_Interests": self.Special_Interests,
+            "Treatments_Offered": self.Treatments_Offered,
+            "Work_Experience": self.Work_Experience,
+            "Image_Src": self.Image_Src,
+            "Contact": self.Contact,
+            "Insurance": self.Insurance,
+            "Availability": self.Availability,
+            "Ratings": self.Ratings,
+            "Comments": self.Comments,
+        }
 
     def __repr__(self):
-        return f"Doctor('{self.name}', '{self.specialty}')"
+        return f"Doctor('{self.Name}', '{self.Specialty}')"
 
- # models.py
 
 class DoctorClaimRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)

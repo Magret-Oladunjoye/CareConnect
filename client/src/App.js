@@ -25,6 +25,7 @@ const AdminRoute = () => {
   return isAdmin ? <Outlet /> : <Navigate to="/auth/login" />;
 };
 
+
 function App() {
   return (
     <I18nextProvider i18n={i18n}>

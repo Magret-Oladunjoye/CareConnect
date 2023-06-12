@@ -24,7 +24,7 @@ const Specialties = () => {
 
 
   return (
-    <div className="text-center py-8">
+  <div className="text-center py-8">
     <h2 className="text-2xl font-bold mb-4 text-sky-900">{t("Popular Specialties")}</h2>
     <div className="max-w-[60%] w-screen h-auto mx-auto lg:grid-cols-3 grid grid-cols-2 gap-4 justify-center my-16">
     
@@ -60,7 +60,7 @@ const Specialties = () => {
       />
 
     </div>
-    </div>
+  </div>
   );
 };
 

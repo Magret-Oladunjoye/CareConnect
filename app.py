@@ -1,17 +1,20 @@
-import logging
+
 from logging.handlers import RotatingFileHandler
 from flask import Flask, jsonify, make_response
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate, upgrade
 from flask.cli import AppGroup
-
+import logging
+logging.basicConfig(level=logging.DEBUG)
 from models import db
 from auth import RefreshResource, Login, Profile, SignUp, UpdateProfile, DoctorClaim, AdminDoctorClaim
 from flask_restful import Api
 from views import views, search_bp
 from config import DevConfig, ProdConfig
 from werkzeug.exceptions import HTTPException
+from nlp_training import train_nlp_algorithm
+
 
 
 

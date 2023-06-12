@@ -1,0 +1,44 @@
+.recommend-card-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto; /* Add margin to center the container horizontally */
+    max-width: 1200px; /* Set a maximum width to limit the container size */
+  }
+  @media screen and (max-width: 768px) {
+    .recommend-card-container {
+      grid-template-columns: repeat(2, 1fr); /* Change to 2 columns on smaller screens */
+    }
+  }
+  
+  .recommend-card {
+    width: 200px;
+    margin: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+  }
+  
+  .recommend-card__image img {
+    width: 100%;
+    height: auto;
+  }
+  
+  .recommend-card__info p {
+    margin: 5px 0;
+  }
+  
+  .recommend-card__link {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #94d7f6;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+  }
+  
+  .recommend-card__link:hover {
+    background-color: #6885a3;
+  }
+  

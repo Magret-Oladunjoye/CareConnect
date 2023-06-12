@@ -15,9 +15,7 @@ const DoctorCard = ({ doctor }) => {
         <p>{Name}</p>
         <p>Specialty: {Specialty}</p>
         <p>Location: {Location}</p>
-        {Ratings && (
-          <p>Average Rating: {Ratings.reduce((a, b) => a + b, 0) / Ratings.length}</p>
-        )}
+        
         <Link to={`/doctor/${doctor.id}`} className="doctor-card__link">
           View Details
         </Link>

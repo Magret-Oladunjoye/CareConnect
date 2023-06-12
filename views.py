@@ -1,11 +1,12 @@
 #create website routes for our websites where users can go to, except login 
 
-from flask import Blueprint, render_template, jsonify, request #define that this file is a blueprint of our app
+from flask import Blueprint, render_template, jsonify, json, request #define that this file is a blueprint of our app
 from database.db import get_db
 from urllib.parse import unquote
 from models import Users
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from nlp_training import train_nlp_algorithm
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt, verify_jwt_in_request
+from nlp_training import preprocess_text, train_nlp_algorithm, recommend_doctors as recommend_func, condition_specialty_mapping
+
 
 views = Blueprint('views', __name__)
 search_bp = Blueprint('search', __name__, url_prefix='/search')
@@ -196,32 +197,39 @@ def save_search_history():
             cursor.close()
     else:
         return jsonify({'message': 'User not found'})
+    
+import pickle
+from models import Doctors
 
-
-#route to retrieve user search_history to be used in NLP algorithm
-@views.route('/api/search_history', methods=['GET'])
+@views.route('/recommend_doctors', methods=['POST'])
 @jwt_required()
-def get_search_history():
-    # Get the current user's username from the JWT
+def recommend_doctors():
     current_user = get_jwt_identity()
 
-    # Query the database to retrieve the search history for the current user
-    db = get_db()
-    cursor = db.cursor()
-    query = """
-        SELECT search_history FROM Users
-        WHERE username = %s
-    """
-    cursor.execute(query, (current_user,))
-    result = cursor.fetchone()
+    # Get the user's search history
+    user = Users.query.filter_by(username=current_user).first()
+    if not user:
+        return jsonify({"message": "User not found"}), 404
 
-    if result is None:
-        return jsonify({'message': 'Search history not found'}), 404
+    search_history = user.search_history.split(',')
 
-    nlp_data = result[0].split(',')
-    nlp_data = [term for term in nlp_data if term.lower() != "none"]
-    nlp_data = [term.lower() for term in nlp_data]
-    
-    trained_model = train_nlp_algorithm(nlp_data)
+    # Get all doctors' information
+    doctors = Doctors.query.all()
 
-    return jsonify({'search_history': nlp_data})
+    # Train the NLP model
+    processed_search_history = [preprocess_text(text) for text in search_history]
+    model = train_nlp_algorithm(processed_search_history)
+
+    # Get recommended doctors
+    recommended_doctors = recommend_func(search_history, model, doctors, condition_specialty_mapping)
+
+
+    # Convert recommended doctors to a list of dictionaries
+    recommended_doctors_dict = [doctor.to_dict() for doctor in recommended_doctors]
+
+    # Return the recommended doctors as a JSON response
+    return jsonify({"recommendations": recommended_doctors_dict}), 200
+
+
+
+

@@ -6,6 +6,22 @@ import { Link } from "react-scroll";
 import { useAuth } from "../AuthContext";
 import { useTranslation } from "react-i18next";
 
+function LanguageSwitcher() {
+  const { i18n } = useTranslation();
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
+
+  return (
+    <div className= "bg-sky-100 drop-shadow-lg">
+      <select className= "bg-sky-100 drop-shadow-lg"value={i18n.language} onChange={(e) => changeLanguage(e.target.value)}>
+        <option  value="en">English</option>
+        <option  value="tr">Türkçe</option>
+      </select>
+    </div>
+  );
+}
 
 const Navbar = () => {
   const { t } = useTranslation();
@@ -25,8 +41,8 @@ const Navbar = () => {
     navigate("/auth/login");
   };
 
-  return (
-    <div className="flex justify-between items-center h-24 w-screen mx-auto px-4 bg-sky-100 drop-shadow-lg">
+  return ( 
+    <div className="flex justify-between items-center h-15 w-screen mx-auto px-4 bg-sky-100 drop-shadow-lg">  
       <header className="px-4 py-2">
         <a
           onClick={() => {
@@ -38,6 +54,7 @@ const Navbar = () => {
         </a>
       </header>
 
+      
       <ul className="invisible md:visible md:flex text-900 font-semibold">
         <li className="p-4 hover:cursor-pointer">
         
@@ -90,14 +107,14 @@ const Navbar = () => {
               onClick={() => {
                 navigate("/auth/profile");
               }}
-              className="p-4 hover:cursor-pointer"
+              className="text-white font-semibold bg-800 hover:text-white border border-900 hover:bg-700 rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 drop-shadow-xl"
             >
-            {t("Profile")}
+            {t(" Manage Account")}
             </li>
             <button
               onClick={handleLogout}
               type="button"
-              className="text-white font-semibold bg-red-600 hover:text-white border border-red-600 hover:bg-red-700 rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 drop-shadow-xl"
+              className="text-white font-semibold bg-red-600 hover:text-white border  rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 drop-shadow-xl"
             >
             {t("Logout")}
             </button>

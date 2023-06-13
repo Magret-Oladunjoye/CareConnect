@@ -9,7 +9,7 @@ const RecommendCard = ({ doctor }) => {
 
   return (
   <div className="recommend-card">
-    <div className="recommend-card__image">
+    <div className="recommend-card__image img">
       <img src={doctorImageSrc} alt={`Dr. ${Name}`} />
     </div>
     <div className="recommend-card__info">
@@ -17,7 +17,7 @@ const RecommendCard = ({ doctor }) => {
       <p>Specialty: {Specialty}</p>
       <p>Location: {Location}</p>
       <Link to={`/doctor/${doctor.id}`} className="recommend-card__link">
-        View {`${Name}`}
+        Learn More
       </Link>
     </div>
   </div>

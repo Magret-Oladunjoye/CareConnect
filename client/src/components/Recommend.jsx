@@ -37,7 +37,7 @@ const Recommend = () => {
               </div>
             ))
           ) : (
-            <p>No recommendations available.</p>
+            <p> </p>
           )}
         </div>
       </div>

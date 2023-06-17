@@ -45,7 +45,7 @@ def create_app(config):
     api.add_resource(UpdateProfile, "/auth/update-profile")
     api.add_resource(RefreshResource, "/auth/refresh")
     api.add_resource(DoctorClaim, '/doctor/claim')
-    api.add_resource(AdminDoctorClaim, '/admin/doctor_claims', '/admin/doctor_claims/<int:claim_id>')
+    api.add_resource(AdminDoctorClaim, '/admin/doctor_claims', '/admin/doctor_claims/<int:claim_id>',  '/admin/doctor_claims/<int:claim_id>/send_approval_email')
 
 
     @app.route("/")

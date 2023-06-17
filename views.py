@@ -6,7 +6,8 @@ from urllib.parse import unquote
 from models import Users
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt, verify_jwt_in_request
 from nlp_training import preprocess_text, train_nlp_algorithm, recommend_doctors as recommend_func, condition_specialty_mapping
-
+from models import Doctors, Users, Comments
+from datetime import datetime
 
 views = Blueprint('views', __name__)
 search_bp = Blueprint('search', __name__, url_prefix='/search')
@@ -15,97 +16,6 @@ search_bp = Blueprint('search', __name__, url_prefix='/search')
 @views.route('/')
 def index():
     return render_template('index.html')
-
-
-@views.route('/search_name', methods = ['GET', 'POST'])
-def search_name():
-    if request.method == 'POST':
-        name_term = request.form['name_term']
-        db = get_db()
-        cursor = db.cursor()
-        name_query = """
-            SELECT * FROM Doctors
-            WHERE Name LIKE %s
-        """
-
-        cursor.execute(name_query, ('%' + name_term + '%',))
-        results = cursor.fetchall()
-        columns = [column[0] for column in cursor.description]
-        results_list = [dict(zip(columns, row)) for row in results]
-    
-   # Return the results as JSON
-        return jsonify(results_list)
-
-    # If the request method is GET, return an empty JSON array
-    return jsonify([])
-
-
-@views.route('/search_location', methods=['GET', 'POST'])
-def search_location():
-    if request.method == 'POST':
-        location_term = request.form['location_term']
-        db = get_db()
-        cursor = db.cursor()
-        location_query ="""
-            SELECT * FROM Doctors
-            WHERE Location LIKE %s
-        """
-
-        cursor.execute(location_query, ('%' + location_term + '%',))
-        results = cursor.fetchall()
-        columns = [column[0] for column in cursor.description]
-        results_list = [dict(zip(columns, row)) for row in results]
-    
-   # Return the results as JSON
-        return jsonify(results_list)
-
-    # If the request method is GET, return an empty JSON array
-    return jsonify([])
-
-
-@views.route('/search_specialty', methods=['GET', 'POST'])
-def search_specialty():
-    if request.method == 'POST':
-        specialty_term = request.form['specialty_term']
-        db = get_db()
-        cursor = db.cursor()
-        specialty_query = """
-            SELECT * FROM Doctors
-            WHERE Specialty LIKE %s
-        """
-
-        cursor.execute(specialty_query, ('%' + specialty_term + '%',))
-        results = cursor.fetchall()
-        columns = [column[0] for column in cursor.description]
-        results_list = [dict(zip(columns, row)) for row in results]
-    
-   # Return the results as JSON
-        return jsonify(results_list)
-
-    # If the request method is GET, return an empty JSON array
-    return jsonify([])
-
-@views.route('/search_hospital', methods=['GET', 'POST'])
-def search_hospital():
-    if request.method == 'POST':
-        hospital_term = request.form['hospital_term']
-        db = get_db()
-        cursor = db.cursor()
-        hospital_query = """
-            SELECT * FROM Doctors
-            WHERE Hospital LIKE %s
-        """
-
-        cursor.execute(hospital_query, ('%' + hospital_term + '%',))
-        results = cursor.fetchall()
-        columns = [column[0] for column in cursor.description]
-        results_list = [dict(zip(columns, row)) for row in results]
-    
-   # Return the results as JSON
-        return jsonify(results_list)
-
-    # If the request method is GET, return an empty JSON array
-    return jsonify([])
 
 
 
@@ -154,6 +64,107 @@ def search_doctor(id):
     result_dict = dict(zip(columns, result))
 
     return jsonify(result_dict)
+
+
+from flask import request
+
+@views.route('/search_doctor/<id>/ratings', methods=['PUT'])
+@jwt_required(optional=False)
+def add_rating_comment(id):  # id has been added here
+    db = get_db()
+    cursor = db.cursor()
+    
+    # Query to fetch the doctor with the given ID
+    query = """
+        SELECT * FROM Doctors
+        WHERE ID=%s
+    """
+    cursor.execute(query, (id,))
+    result = cursor.fetchone()
+
+    if not result:
+        return jsonify({"message": "Doctor not found"}), 404
+
+    # Now result contains the doctor data, and you can proceed with your logic.
+    
+    data = request.get_json()
+    rating = data.get('rating')
+    comment_text = data.get('comment')
+    current_date = datetime.now().date()  # Get the current date
+
+    current_username = get_jwt_identity()
+    
+    # Query the Users model with the username to get the User instance
+    current_user = Users.query.filter_by(username=current_username).first()
+    
+    # Check if the user is authenticated
+    if not current_user:
+        return jsonify({"message": "User must be logged in to leave a comment"}), 403
+
+    # Create a new comment
+    comment = Comments(
+        user_id=current_user.id,
+        doctor_id=id,
+        rating=rating,
+        comment=comment_text,
+        timestamp=current_date
+    )
+
+    comment.save()
+    db.commit();
+    return jsonify({"message": "Rating and comment added successfully"})
+
+
+
+@views.route('/search_doctor/<id>/comments_ratings', methods=['GET'])
+def get_comments_ratings(id):
+
+    # Fetch the comments
+    comments = Comments.query.filter_by(doctor_id=id).all()
+
+    # If no comments are found for the doctor
+    if not comments:
+        return jsonify({"message": "No comments found for this doctor."}), 404
+
+    # Create a list to hold the comments data
+    comments_data = []
+
+    # Loop through the comments
+    for comment in comments:
+        # Fetch the user who made the comment
+        user = Users.query.get(comment.user_id)
+
+        # Append the comment info to the comments_data list
+        comments_data.append({
+            "username": user.username,
+            "rating": comment.rating,
+            "comment": comment.comment,
+            "date": comment.timestamp.isoformat() if comment.timestamp else None,
+        })
+
+    # Return the comments data
+    return jsonify(comments_data)
+
+
+@views.route('/search_doctor/<id>/average_rating', methods=['GET'])
+def get_average_rating(id):
+    # Fetch the comments
+    comments = Comments.query.filter_by(doctor_id=id).all()
+
+    # If no comments are found for the doctor
+    if not comments:
+        return jsonify({"message": "No comments found for this doctor."}), 404
+
+    # Calculate the average rating
+    total_ratings = sum(comment.rating for comment in comments)
+    average_rating = total_ratings / len(comments)
+
+    # Format the average rating as a float with one decimal point
+    average_rating = round(average_rating, 1)
+
+    # Return the average rating
+    return jsonify({"average_rating": average_rating})
+
 
 
 @views.route('/api/save_search_history', methods=['POST'])

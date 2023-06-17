@@ -17,6 +17,10 @@ import traceback
 import logging
 logging.basicConfig(level=logging.DEBUG)
 from models import Doctors
+from flask_mail import Mail, Message
+from flask import current_app
+mail = Mail()
+
 # Removed Namespace import and signup_model, login_model, profile_model
 
 # Create request parsers for the POST requests
@@ -176,6 +180,41 @@ class DoctorClaim(Resource):
 
         return make_response(jsonify({"message": "Doctor claim request submitted successfully"}), 201)
 
+    def send_approval_email(self, doctor_email, doctor_name):
+        msg = Message(
+            "Claim Approval",
+            sender=current_app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[doctor_email],
+        )
+        msg.body = f"Hello, Dr. {doctor_name}! Your claim has been approved. You can now manage your account in the profile section."
+        mail.send(msg)
+
+    def put(self, claim_id):
+        try:
+            claim = DoctorClaimRequest.query.get(claim_id)
+            if not claim:
+                return {"message": "Claim not found"}, 404
+
+            data = request.get_json()
+
+            status = data.get('status')
+            if status not in ['approved', 'rejected']:
+                return {"message": "Invalid status value"}, 400
+
+            claim.status = status
+            db.session.commit()
+
+            if status == "approved":
+                # Get the doctor's email and name
+                doctor_email = claim.email
+                doctor_name = f"{claim.first_name} {claim.last_name}"
+                self.send_approval_email(doctor_email, doctor_name)
+
+            return {"message": f"Claim {claim_id} updated to {status}"}, 200
+        except Exception as e:
+            app.logger.error(f"Failed to update claim status: {str(e)}")
+            return {"message": "Internal Server Error"}, 500
+
 
 class RefreshResource(Resource):
     @jwt_required()
@@ -207,33 +246,34 @@ class AdminDoctorClaim(Resource):
         except Exception as e:
             app.logger.error(f"Failed to get doctor claims: {str(e)}")
             return {"message": "Internal Server Error"}, 500
-    
-    
 
     @jwt_required()
     def put(self, claim_id):
-        current_user = get_jwt_identity()
-        user = Users.query.filter_by(username=current_user).first()
+        try:
+            current_user = get_jwt_identity()
+            user = Users.query.filter_by(username=current_user).first()
 
-        # Ensure the current user is an admin
-        if not user.is_admin:
-            return {"message": "Unauthorized access"}, 401
+            # Ensure the current user is an admin
+            if not user.is_admin:
+                return {"message": "Unauthorized access"}, 401
 
-        claim = DoctorClaimRequest.query.get(claim_id)
-        if not claim:
-            return {"message": "Claim not found"}, 404
+            claim = DoctorClaimRequest.query.get(claim_id)
+            if not claim:
+                return {"message": "Claim not found"}, 404
 
-        data = request.get_json()
+            data = request.get_json()
 
-        status = data.get('status')
-        if status not in ['approved', 'rejected']:
-            return {"message": "Invalid status value"}, 400
+            status = data.get('status')
+            if status not in ['approved', 'rejected']:
+                return {"message": "Invalid status value"}, 400
 
-        claim.status = status
-        db.session.commit()
+            claim.status = status
+            db.session.commit()
 
-        return {"message": f"Claim {claim_id} updated to {status}"}, 200
-
+            return {"message": f"Claim {claim_id} updated to {status}"}, 200
+        except Exception as e:
+            app.logger.error(f"Failed to update claim status: {str(e)}")
+            return {"message": "Internal Server Error"}, 500
 
 
 def handle_type_error(e):

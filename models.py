@@ -3,6 +3,7 @@
 # In other words, it describes how the data will be structured in your Python
 # code aand how it will interact with the database.
 
+import datetime
 from database import db
 from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
@@ -10,6 +11,7 @@ db = SQLAlchemy()
 
 class Doctors(db.Model):
     ID = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
     Name = db.Column(db.String(100), nullable=False)
     Specialty = db.Column(db.String(100), nullable=False)
     About = db.Column(db.Text, nullable=False)
@@ -24,6 +26,7 @@ class Doctors(db.Model):
     Availability = db.Column(db.String(200))
     Ratings = db.Column(db.String(200))
     Comments = db.Column(db.String(100))
+    Date = db.Column(db.Date, nullable=True)
 
     def to_dict(self):
         return {
@@ -42,6 +45,7 @@ class Doctors(db.Model):
             "Availability": self.Availability,
             "Ratings": self.Ratings,
             "Comments": self.Comments,
+            "Date": self.Date
         }
 
     def __repr__(self):
@@ -58,7 +62,7 @@ class DoctorClaimRequest(db.Model):
     last_name = db.Column(db.String(100))
     email = db.Column(db.String(100))
     phone_number = db.Column(db.String(20))
-    status = db.Column(db.String(20), default="pending")  # pending, approved, rejected
+    status = db.Column(db.String(20))  # pending, approved, rejected
     
     
     def to_dict(self):
@@ -91,6 +95,7 @@ class Users(db.Model):
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
     is_doctor = db.Column(db.Boolean, nullable=False, default=False)
     search_history = db.Column(db.String(500), nullable=True, default="")
+    Comments = db.Column(db.String(100))
     
     def to_dict(self):
         return {
@@ -101,7 +106,8 @@ class Users(db.Model):
             "address": self.address,
             "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
             "gender": self.gender,
-            "search_history": self.search_history
+            "search_history": self.search_history,
+            "comments": self.Comments
         }
 
     def __repr__(self):
@@ -114,3 +120,28 @@ class Users(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+class Comments(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.ID'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    comment = db.Column(db.String(500), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    user = db.relationship('Users', backref=db.backref('comments', lazy=True))
+    doctor = db.relationship('Doctors', backref=db.backref('comments', lazy=True))
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'doctor_id': self.doctor_id,
+            'rating': self.rating,
+            'comment': self.comment,
+            'timestamp': self.timestamp.isoformat()
+        }

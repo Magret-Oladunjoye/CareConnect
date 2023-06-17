@@ -1,76 +1,103 @@
-import { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import StarRating from "./StarRating";
 import CommentStats from "./CommentStats";
 import Footer from "./Footer.jsx";
-import { UserContext } from "../lib/UserContext";
 import { useParams } from "react-router-dom";
+import axios from "axios";
 
 function CommentSection() {
-  const { loggedIn } = useContext(UserContext);
+  const [loggedInUser, setLoggedInUser] = useState(null);
   const [comments, setComments] = useState([]);
-  const [ratings, setRatings] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [rating, setRating] = useState(0);
+  const [error, setError] = useState(null);
 
   const { id } = useParams();
 
   useEffect(() => {
     const fetchCommentsRatings = async () => {
       try {
-        const response = await fetch(`/search_doctor/${id}/comments_ratings`);
-        if (response.ok) {
-          const data = await response.json();
-          setComments(data.comments ?? []);
-          setRatings(data.ratings ?? []);
-        } else {
-          console.error("Failed to fetch comments and ratings:", response.status);
-        }
+        const response = await axios.get(`/search_doctor/${id}/comments_ratings`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        const { data } = response; // The data will be an array of comments
+
+        console.log("Fetched comments:", data);
+        setComments(data ?? []);
       } catch (error) {
-        console.error("Error fetching comments and ratings:", error);
+        console.log("Failed to fetch comments and ratings");
       }
     };
 
     fetchCommentsRatings();
   }, [id]);
 
+  useEffect(() => {
+    const fetchLoggedInUser = async () => {
+      try {
+        const response = await axios.get("/auth/profile", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+        const { data } = response;
+        setLoggedInUser(data.data);
+      } catch (error) {
+        setError("Failed to fetch logged-in user");
+      }
+    };
+
+    fetchLoggedInUser();
+  }, []);
+
   const handleCommentSubmit = async (event) => {
     event.preventDefault();
-    if (!loggedIn) return; // user must be logged in to comment.
+    if (!loggedInUser) return; // user must be logged in to comment.
     if (!newComment.trim()) return; // don't allow empty comments
 
     try {
-      const response = await fetch(`/search_doctor/${id}/ratings`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await axios.put(
+        `/search_doctor/${id}/ratings`,
+        {
           rating,
           comment: newComment.trim(),
-        }),
-      });
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
 
-      if (response.ok) {
+      if (response.status === 200) {
         // Comment and rating added successfully
         const newCommentData = {
-          username: "Current User", // Update with actual username
+          username: loggedInUser.username,
           rating,
           comment: newComment,
-          date: new Date().toISOString(), // Update with actual date
+          date: new Date().toLocaleString(), // Update the date format here
         };
 
+        // Update the comments state
         setComments((prevComments) => [...prevComments, newCommentData]);
-        setRatings((prevRatings) => [...prevRatings, rating]);
+
+        // Clear the new comment and rating inputs
         setNewComment("");
         setRating(0);
       } else {
         // Handle error case
-        console.error("Failed to add comment:", response.status);
+        setError("Failed to add comment");
       }
     } catch (error) {
-      console.error("Error adding comment:", error);
+      setError("Error adding comment");
     }
   };
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
   return (
     <div>
@@ -79,7 +106,7 @@ function CommentSection() {
           <CommentStats comments={comments} />
         </div>
         <div className="w-full pb-8 pt-4">
-          {loggedIn ? (
+          {loggedInUser ? (
             <form onSubmit={handleCommentSubmit}>
               <h2 className="text-2xl font-bold mb-4">Leave a Review</h2>
               <label htmlFor="comment-input" className="sr-only">
@@ -94,9 +121,7 @@ function CommentSection() {
                 required
               />
               <div className="grid grid-cols-3 pt-4 pb-6">
-                <p className="font-bold">
-                  Rate your experience out of 5-stars:
-                </p>
+                <p className="font-bold">Rate your experience out of 5-stars:</p>
                 <StarRating rating={rating} onRatingChange={setRating} />
                 <button
                   type="submit"
@@ -117,14 +142,11 @@ function CommentSection() {
             <p>No comments yet.</p>
           ) : (
             <ul>
-              {comments.map(({ username, comment, date }, index) => (
-                <li
-                  key={index}
-                  className="border border-gray-300 rounded-lg p-4 mb-4"
-                >
+              {comments.map(({ username, rating, comment, date }, index) => (
+                <li key={index} className="border border-gray-300 rounded-lg p-4 mb-4">
                   <p className="text-lg font-bold">{username}</p>
-                  <StarRating rating={ratings[index]} disabled />
-                  <p className="flex inline-flextext-gray-600">{comment}</p>
+                  <StarRating rating={rating} disabled />
+                  <p className="flex inline-flex text-gray-600">{comment}</p>
                   <p className="text-sm text-gray-400">{date}</p>
                 </li>
               ))}

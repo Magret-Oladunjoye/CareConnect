@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import SearchBar from "./SearchBar";
 import { useTranslation } from 'react-i18next';
 import avatar from "../images/avatar.png";
+import axios from "axios"; 
 
 
 const availabilityOptions = [
@@ -19,13 +20,25 @@ const availabilityOptions = [
 const DoctorCard = ({ doctor }) => {
   const { t } = useTranslation();
   const [imageError, setImageError] = useState(false);
-  let ratings = [];
-  if (doctor.Ratings) {
-    ratings = doctor.Ratings.split(',').map(Number);
-  }
+  const [averageRating, setAverageRating] = useState(null);
 
-  const ratingsCount = ratings.length;
-  const averageRating = ratingsCount > 0 ? ratings.reduce((a, b) => a + b, 0) / ratingsCount : "No ratings";
+  useEffect(() => {
+    const fetchAverageRating = async () => {
+      try {
+        const response = await axios.get(`/search_doctor/${doctor.ID}/average_rating`);
+        const { average_rating } = response.data;
+        const formattedRating = parseFloat(average_rating).toFixed(1);
+        setAverageRating(formattedRating);
+        console.log(average_rating);
+      } catch (error) {
+        
+        console.error("Error fetching average rating:", error);
+      }
+    };
+
+    fetchAverageRating();
+  }, [doctor.ID]);
+
 
   const translatedSpecialty = t(doctor.Specialty);
   const translatedLocation = t(doctor.Location);
@@ -51,8 +64,8 @@ const DoctorCard = ({ doctor }) => {
         <p>{t('Specialty')}: {translatedSpecialty}</p>
         <p>{t('Location')}: {translatedLocation}</p>
         <p>{t('Insurance Accepted')}: {translatedInsurance}</p>
-        <p>{t('Average Rating')}: {averageRating}</p>
-        
+        <p>{t('Average Rating')}: {averageRating !== null ? averageRating : 'No Ratings'}</p>
+
         <Link to={`/search_doctor/${doctor.ID}`} style={{ color: 'blue', fontStyle: 'italic' }}>{translatedViewDetails}</Link>
       </div>
     </div>

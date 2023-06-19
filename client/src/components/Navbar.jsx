@@ -96,7 +96,7 @@ const Navbar = () => {
               navigate("/auth/login");
             }}
             type="button"
-            className="text-white font-semibold bg-800 hover:text-white border border-900 hover:bg-700 rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 drop-shadow-xl"
+            className="text-white border bg-800 hover:bg-700 rounded-2xl text-lg px-6 py-2 text-center drop-shadow-xl"
           >
             Sign In
           </button>

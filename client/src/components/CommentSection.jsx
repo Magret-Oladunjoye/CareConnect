@@ -11,17 +11,21 @@ function CommentSection() {
   const [newComment, setNewComment] = useState("");
   const [rating, setRating] = useState(0);
   const [error, setError] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   const { id } = useParams();
 
   useEffect(() => {
     const fetchCommentsRatings = async () => {
       try {
-        const response = await axios.get(`/search_doctor/${id}/comments_ratings`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        });
+        const response = await axios.get(
+          `/search_doctor/${id}/comments_ratings`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          }
+        );
         const { data } = response; // The data will be an array of comments
 
         console.log("Fetched comments:", data);
@@ -94,6 +98,16 @@ function CommentSection() {
       setError("Error adding comment");
     }
   };
+  // Comment Submitted Pop-up
+  useEffect(() => {
+    if (showPopup) {
+      const timer = setTimeout(() => {
+        setShowPopup(false);
+      }, 1000); //close after 1 second
+
+      return () => clearTimeout(timer);
+    }
+  }, [showPopup]);
 
   if (error) {
     return <p>Error: {error}</p>;
@@ -121,7 +135,9 @@ function CommentSection() {
                 required
               />
               <div className="grid grid-cols-3 pt-4 pb-6">
-                <p className="font-bold">Rate your experience out of 5-stars:</p>
+                <p className="font-bold">
+                  Rate your experience out of 5-stars:
+                </p>
                 <StarRating rating={rating} onRatingChange={setRating} />
                 <button
                   type="submit"
@@ -143,10 +159,13 @@ function CommentSection() {
           ) : (
             <ul>
               {comments.map(({ username, rating, comment, date }, index) => (
-                <li key={index} className="border border-gray-300 rounded-lg p-4 mb-4">
+                <li
+                  key={index}
+                  className="border border-gray-300 rounded-lg p-4 mb-4"
+                >
                   <p className="text-lg font-bold">{username}</p>
                   <StarRating rating={rating} disabled />
-                  <p className="flex inline-flex text-gray-600">{comment}</p>
+                  <p className="inline-flex text-gray-600">{comment}</p>
                   <p className="text-sm text-gray-400">{date}</p>
                 </li>
               ))}
@@ -154,6 +173,15 @@ function CommentSection() {
           )}
         </div>
       </div>
+      {showPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 shadow-lg">
+            <p className="text-lg font-bold text-gray-800">
+              Comment submitted!
+            </p>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   );

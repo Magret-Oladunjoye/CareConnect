@@ -17,12 +17,19 @@ const Hero = () => {
     >
       <div className="max-w-[70%] mx-auto text-center flex flex-col justify-center py-12">
         <h1 className="mt-2 text-3xl font-bold drop-shadow-lg">
-        {t("Find, Compare, and Review Doctors")}
+          {t("Find, Compare, and Review Doctors")}
         </h1>
         <p className="text-xl m-4 font-light drop-shadow-lg">
-          {t("Get honest and transparent information, ratings, and reviews on your healthcare providers")}
+          {t(
+            "Get honest and transparent information, ratings, and reviews on your healthcare providers"
+          )}
         </p>
         <SearchBar />
+      </div>
+      <div className="p-12">
+        <button className="px-4 py-2 border rounded-md drop-shadow-2xl shadow border-gray-300 bg-gray-300 hover:underline bg-opacity-80 text-gray-900 font-light">
+          <a href="/claim"> Physicians: Claim Your Profile Here</a>
+        </button>
       </div>
     </div>
   );

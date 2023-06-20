@@ -1,0 +1,12 @@
+.suggestions-list {
+    @apply absolute w-full top-[100%] mt-1 py-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-auto z-10;
+  }
+  
+  .suggestions-list li {
+    @apply cursor-pointer px-4 py-2 hover:bg-gray-200;
+  }
+  
+  .suggestions-list li:not(:last-child) {
+    @apply border-b border-gray-200;
+  }
+  

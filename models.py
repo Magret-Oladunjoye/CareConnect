@@ -11,7 +11,6 @@ db = SQLAlchemy()
 
 class Doctors(db.Model):
     ID = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
     Name = db.Column(db.String(100), nullable=False)
     Specialty = db.Column(db.String(100), nullable=False)
     About = db.Column(db.Text, nullable=False)
@@ -49,7 +48,7 @@ class Doctors(db.Model):
         }
 
     def __repr__(self):
-        return f"Doctor('{self.Name}', '{self.Specialty}')"
+        return f"Doctor('{self.Name}', '{self.Specialty}', ID={self.ID},)"
 
 
 class DoctorClaimRequest(db.Model):

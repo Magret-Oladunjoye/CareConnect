@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSearch } from "../SearchContext";
-import "../Doctorlist.css";
 import Navbar from "../components/Navbar";
 import SearchBar from "./SearchBar";
 import { useTranslation } from 'react-i18next';
 import avatar from "../images/avatar.png";
 import axios from "axios"; 
-
+import CommentStats from "./CommentStats";
+import StarRating from "./StarRating";
+import { useParams } from "react-router-dom";
 
 const availabilityOptions = [
   { value: 'Monday', label: 'Monday' },
@@ -21,6 +22,7 @@ const DoctorCard = ({ doctor }) => {
   const { t } = useTranslation();
   const [imageError, setImageError] = useState(false);
   const [averageRating, setAverageRating] = useState(null);
+  const [comments, setComments] = useState([]);
 
   useEffect(() => {
     const fetchAverageRating = async () => {
@@ -39,6 +41,28 @@ const DoctorCard = ({ doctor }) => {
     fetchAverageRating();
   }, [doctor.ID]);
 
+  useEffect(() => {
+    const fetchCommentsRatings = async () => {
+      try {
+        const response = await axios.get(
+          `/search_doctor/${doctor.ID}/comments_ratings`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          }
+        );
+        const { data } = response; // The data will be an array of comments
+
+        console.log("Fetched comments:", data);
+        setComments(data || []);
+      } catch (error) {
+        console.log("Failed to fetch comments and ratings");
+      }
+    };
+
+    fetchCommentsRatings();
+  }, [doctor.ID]);
 
   const translatedSpecialty = t(doctor.Specialty);
   const translatedLocation = t(doctor.Location);
@@ -53,20 +77,25 @@ const DoctorCard = ({ doctor }) => {
     <div className="m-9 flex md:grid md:grid-cols-7 items-center border rounded-xl bg-gradient-to-r from-sky-100 to-700">
       <div className="doctor-card__image">
         <img
-          className="m-8 w-24 h-24"
+          className="m-8 w-24 h-24 rounded-full"
           src={imageError ? avatar : doctor.Image_Src}
           alt={`${doctor.Name}`}
           onError={handleImageError}
         />
       </div>
-      <div className="col-span-4 text-left ml-12">
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>{doctor.Name}</h1>
+      <div className="col-span-4 text-left">
+        <h1 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{doctor.Name}</h1>
         <p>{t('Specialty')}: {translatedSpecialty}</p>
         <p>{t('Location')}: {translatedLocation}</p>
         <p>{t('Insurance Accepted')}: {translatedInsurance}</p>
-        <p>{t('Average Rating')}: {averageRating !== null ? averageRating : 'No Ratings'}</p>
-
         <Link to={`/search_doctor/${doctor.ID}`} style={{ color: 'blue', fontStyle: 'italic' }}>{translatedViewDetails}</Link>
+      </div>
+      <div className="col-span-2 items-center text-center">
+      <CommentStats comments={comments} />
+      <StarRating 
+      rating = {averageRating}  
+      readOnly={true}>
+      </StarRating>
       </div>
     </div>
   );

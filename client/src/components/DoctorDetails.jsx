@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import "../DoctorDetails.css";
 import ProfileBanner from './ProfileBanner';
 import InfoTabs from './InfoTabs';
 import CommentSection from "../components/CommentSection";

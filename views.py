@@ -8,6 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt, verify_j
 from nlp_training import preprocess_text, train_nlp_algorithm, recommend_doctors as recommend_func, condition_specialty_mapping
 from models import Doctors, Users, Comments
 from datetime import datetime
+from sqlalchemy import text
 
 views = Blueprint('views', __name__)
 search_bp = Blueprint('search', __name__, url_prefix='/search')
@@ -113,6 +114,27 @@ def add_rating_comment(id):  # id has been added here
     comment.save()
     db.commit();
     return jsonify({"message": "Rating and comment added successfully"})
+
+@views.route('/api/suggestions', methods=['GET'])
+def get_suggestions():
+    query = request.args.get('query', '')
+    db = get_db()
+    cursor = db.cursor()
+
+    # Use an SQL SELECT statement to fetch only the names of the doctors
+    sql_query = """
+        SELECT Name FROM Doctors
+        WHERE Name LIKE %(query)s
+    """
+    cursor.execute(sql_query, {'query': f'%{query}%'})
+
+    suggestions = cursor.fetchall()
+    suggestion_names = [doctor[0] for doctor in suggestions]
+
+    return jsonify(suggestion_names)
+
+
+
 
 
 

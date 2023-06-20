@@ -25,6 +25,7 @@ function LanguageSwitcher() {
       <select className= "bg-sky-100 drop-shadow-lg"value={i18n.language} onChange={(e) => changeLanguage(e.target.value)}>
         <option  value="en">English</option>
         <option  value="tr">Türkçe</option>
+        <option value="ar">العربية</option>
       </select>
     </div>
   );

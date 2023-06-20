@@ -107,7 +107,6 @@ def recommend_doctors(search_history, model, doctors, condition_specialty_mappin
 
     # Vectorize each processed search history and store their features
     search_features_list = [model['vectorizer'].transform([psh]) for psh in processed_search_histories]
-
     # Compute similarities between each search history and doctors
     sim_scores_list = [linear_kernel(sf, model['features']).flatten() for sf in search_features_list]
 

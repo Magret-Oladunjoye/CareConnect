@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "../RecommendCard.css";
 
 const RecommendCard = ({ doctor }) => {
   const { Name, Specialty, Location, Image_Src, Ratings } = doctor;
@@ -8,21 +7,25 @@ const RecommendCard = ({ doctor }) => {
   const doctorImageSrc = Image_Src || "/images/avatar.png";
 
   return (
-  <div className="recommend-card">
-    <div className="recommend-card__image img">
-      <img src={doctorImageSrc} alt={`Dr. ${Name}`} />
-    </div>
-    <div className="recommend-card__info">
-      <p>{Name}</p>
-      <p>Specialty: {Specialty}</p>
-      <p>Location: {Location}</p>
-      <Link to={`/doctor/${doctor.id}`} className="recommend-card__link">
-        Learn More
-      </Link>
-    </div>
-  </div>
+    <div className="flex flex-col md:flex-row m-auto items-center justify-center">
+        <div> 
+          <div className="mx-auto">
+            <img src={doctorImageSrc} alt="avatar" className="mx-auto rounded-3xl"/>
+          </div>
+          <div className="text-center">
+            <p>Name: {Name}</p>
+            <p>Specialty: {Specialty}</p>
+            <p>Location: {Location}</p>
+            <Link to={`/doctor/${doctor.id}`} className="recommend-card__link">
+            Learn More
+          </Link>
+          </div>
+        </div>
+      </div>
 );
 
 };
 
 export default RecommendCard;
+
+

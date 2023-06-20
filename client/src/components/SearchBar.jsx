@@ -1,42 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearch } from "../SearchContext";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../AuthContext";
+import "../suggestions.css";
+
 
 const SearchBar = () => {
   const { t } = useTranslation();
+  const searchInputRef = useRef(null);
   const { handleSearch, doctors } = useSearch();
   const [searchTerm, setSearchTerm] = useState("");
   const [locationTerm, setLocationTerm] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+
   const navigate = useNavigate();
-  // Retrieve the user's username from the local storage
   const username = localStorage.getItem("username");
 
   const handleSearchClick = async (e) => {
-    e.preventDefault(); // Prevent the default behavior of the button click
-
-    // Fetch doctors based on searchTerm and locationTerm
+    e.preventDefault();
     const data = await handleSearch(searchTerm, locationTerm);
-
-
-    // Save search history only if the data is fetched successfully
     if (data) {
       const searchHistoryData = {
         username: username,
         searchTerm: searchTerm,
         locationTerm: locationTerm,
       };
-
       saveSearchHistory(searchHistoryData);
     }
-
     navigate("/search_doctors");
+  };
+
+  const positionSuggestions = () => {
+    if (searchInputRef.current) {
+      return searchInputRef.current.getBoundingClientRect();
+    }
+
+    return { top: 0, left: 0 };
   };
 
   const saveSearchHistory = async (data) => {
     try {
-      console.log(data)
       const response = await fetch("/api/save_search_history", {
         method: "POST",
         headers: {
@@ -56,20 +60,47 @@ const SearchBar = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchTerm.length > 0) {
+        const response = await fetch(`/api/suggestions?query=${searchTerm}`);
+        const data = await response.json();
+        // Limit the suggestions to the first 5 results
+        setSuggestions(data.slice(0, 5));
+      } else {
+        setSuggestions([]);
+      }
+    };
+  
+    fetchSuggestions();
+  }, [searchTerm]);
+  
+
   return (
-    <div className="">
-      {/* Search bar */}
-      <div className="justify-center flex flex-col md:flex-row">
-        <label className="w-[60%] md:w-auto bg-gray-200 border border-gray-300 text-gray-500 font-sans shadow-xl rounded-sm px-4 py-2 mx-auto">
-          {t("SEARCH")}
-        </label>
-        <input
-          type="text"
-          className="block w-[60%] mx-auto px-4 py-2 bg-white border shadow-xl focus:border-cyan-400 focus:ring-cyan-300 focus:outline-none focus:ring focus:ring-opacity-40"
-          placeholder={t("Doctor, Specialty")}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+    <div>
+    <div className="justify-center flex flex-col md:flex-row">
+    <label className="w-[60%] md:w-auto bg-gray-200 border border-gray-300 text-gray-500 font-sans shadow-xl rounded-sm px-4 py-2 mx-auto">
+      {t("SEARCH")}
+    </label>
+    <div className="relative w-[60%] mx-auto">
+      <input
+        type="text"
+        ref={searchInputRef}
+        className="block w-full px-4 py-2 bg-white border shadow-xl focus:border-cyan-400 focus:ring-cyan-300 focus:outline-none focus:ring focus:ring-opacity-40"
+        placeholder={t("Doctor, Specialty")}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      {searchTerm && suggestions.length > 0 && (
+        <ul className="suggestions-list">
+          {suggestions.map((item, index) => (
+            <li key={index} onClick={() => setSearchTerm(item)}>
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
         <label className="w-[60%] md:w-auto bg-gray-200 border border-gray-300 text-gray-500 font-sans shadow-xl rounded-sm px-4 py-2 mx-auto">
           {t("NEAR")}
         </label>

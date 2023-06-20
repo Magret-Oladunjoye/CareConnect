@@ -99,6 +99,16 @@ function CommentSection() {
       setError("Error adding comment");
     }
   };
+  // Comment Submitted Pop-up
+  useEffect(() => {
+    if (showPopup) {
+      const timer = setTimeout(() => {
+        setShowPopup(false);
+      }, 1000); //close after 1 second
+
+      return () => clearTimeout(timer);
+    }
+  }, [showPopup]);
 
   // Comment Submitted Pop-up
   useEffect(() => {

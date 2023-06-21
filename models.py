@@ -94,7 +94,7 @@ class Users(db.Model):
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
     is_doctor = db.Column(db.Boolean, nullable=False, default=False)
     search_history = db.Column(db.String(500), nullable=True, default="")
-    Comments = db.Column(db.String(100))
+    Comments = db.Column(db.String(100), nullable=True)
     
     def to_dict(self):
         return {

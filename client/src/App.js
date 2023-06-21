@@ -41,7 +41,7 @@ function App() {
                 <Route path="/auth/profile" element={<Profile />} />
                 <Route path="/search_doctors" element={<Doctorlist />} />
                 <Route path="/search_doctor/:id" element={<DoctorDetails />} />
-                <Route path="/admin/doctor_claims" element={<AdminDashboard />} />
+                <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/doctor/claim/:id" element={<ClaimProfile />} />
               </Routes>
             </UserProvider>

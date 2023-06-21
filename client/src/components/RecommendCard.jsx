@@ -7,13 +7,13 @@ const RecommendCard = ({ doctor }) => {
   const doctorImageSrc = Image_Src || "/images/avatar.png";
 
   return (
-    <div className="flex flex-col md:flex-row m-auto items-center justify-center">
+    <div className="flex flex-col md:flex-row m-auto items-center justify-center p-4">
         <div> 
           <div className="mx-auto">
-            <img src={doctorImageSrc} alt="avatar" className="mx-auto rounded-3xl"/>
+            <img src={doctorImageSrc} alt="avatar" className="mx-auto rounded-full"/>
           </div>
           <div className="text-center">
-            <p>Name: {Name}</p>
+            <p className="font-bold"> {Name}</p>
             <p>Specialty: {Specialty}</p>
             <p>Location: {Location}</p>
             <Link to={`/doctor/${doctor.id}`} className="recommend-card__link">

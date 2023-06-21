@@ -25,8 +25,8 @@ const Recommend = () => {
   return (
     <div>
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4 text-sky-900">{t("Personalized Doctor Recommendations Just for You")}</h2>
-        <p className="text-center text-sky-900">
+        <h2 className="text-2xl font-bold mb-4 text-sky-900 p-4">{t("Personalized Doctor Recommendations Just for You")}</h2>
+        <p className="text-center text-sky-900 p-4">
           {t(
             "We use advanced technology to analyze your previous activity and tailor our recommendations accordingly. These doctors are suggested based on your unique needs and preferences. We hope this helps you in making informed healthcare decisions."
           )}
@@ -40,7 +40,8 @@ const Recommend = () => {
               </div>
             ))
           ) : (
-            <p>{t("No recommendations found.")}</p>
+            <p className="text-center text-sky-900 p-4">{t("Explore our extensive database of doctors to discover personalized recommendations.")}</p>
+
           )}
         </div>
       </div>

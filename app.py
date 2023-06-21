@@ -8,7 +8,7 @@ from flask.cli import AppGroup
 import logging
 logging.basicConfig(level=logging.DEBUG)
 from models import db
-from auth import RefreshResource, Login, Profile, SignUp, UpdateProfile, DoctorClaim, AdminDoctorClaim
+from auth import RefreshResource, Login, Profile, SignUp, UpdateProfile, DoctorClaim, Admin, AdminDoctorClaim, UserComments, DeleteComment, Userss, DeleteUser
 from flask_restful import Api
 from views import views, search_bp
 from config import DevConfig, ProdConfig
@@ -45,8 +45,12 @@ def create_app(config):
     api.add_resource(UpdateProfile, "/auth/update-profile")
     api.add_resource(RefreshResource, "/auth/refresh")
     api.add_resource(DoctorClaim, '/doctor/claim')
+    api.add_resource(Admin, "/admin")
     api.add_resource(AdminDoctorClaim, '/admin/doctor_claims', '/admin/doctor_claims/<int:claim_id>',  '/admin/doctor_claims/<int:claim_id>/send_approval_email')
-
+    api.add_resource(UserComments, "/admin/user/comments")
+    api.add_resource(DeleteComment, "/admin/user/comments/<int:comment_id>")
+    api.add_resource(DeleteUser, "/admin/users/<int:user_id>")
+    api.add_resource(Userss, "/admin/users")
 
     @app.route("/")
     def index():

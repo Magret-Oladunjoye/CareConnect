@@ -2,7 +2,7 @@ import json
 import logging
 from flask_cors import cross_origin
 from flask_restful import Resource, reqparse
-from models import DoctorClaimRequest, Users, db
+from models import DoctorClaimRequest, Users, db, Comments, Doctors
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import (
     JWTManager,
@@ -228,6 +228,24 @@ class RefreshResource(Resource):
 
 # auth.py
 
+class Admin(Resource):
+    @jwt_required()
+    def get(self):
+        try:
+            current_user = get_jwt_identity()
+
+            user = Users.query.filter_by(username=current_user).first()
+
+            if not user.is_admin:
+                return {"message": "Unauthorized access"}, 401
+
+            claims = DoctorClaimRequest.query.all()
+            claim_list = [claim.to_dict() for claim in claims]
+
+            return jsonify({"data": claim_list})
+        except SQLAlchemyError as e:
+            app.logger.error(f"Failed to get doctor claims: {str(e)}")
+            return {"message": "Internal Server Error"}, 500
 
 
 class AdminDoctorClaim(Resource):
@@ -279,3 +297,117 @@ class AdminDoctorClaim(Resource):
 def handle_type_error(e):
 
     return jsonify({"message": "An error occurred while processing your request."}), 500
+
+
+class UserComments(Resource):
+    @jwt_required()
+    def get(self):
+        # Check if the user is an admin
+        current_user = get_jwt_identity()
+        user = Users.query.filter_by(username=current_user).first()
+        if not user or not user.is_admin:
+            return jsonify({"message": "Unauthorized"}), 403
+
+        try:
+            # Fetch the user comments with their names
+            user_comments = db.session.query(Comments).join(Users, Comments.user_id == Users.id).all()
+
+            # Create a list to hold the user comments data
+            comments_data = []
+
+            # Loop through the user comments
+            for comment in user_comments:
+                # Append the user comment info to the comments_data list
+                comments_data.append({
+                    "id": comment.id,
+                    "user_id": comment.user_id,
+                    "doctor_id": comment.doctor_id,
+                    "rating": comment.rating,
+                    "comment": comment.comment,
+                    "timestamp": comment.timestamp.isoformat() if comment.timestamp else None,
+                    "username": comment.user.username
+                })
+
+            # Return the user comments data
+            return jsonify(comments_data)
+        except SQLAlchemyError as e:
+            app.logger.error(f"Failed to retrieve user comments: {str(e)}")
+            return {"message": "Internal Server Error"}, 500
+
+
+class DeleteComment(Resource):
+    @jwt_required()
+    def delete(self, comment_id):
+        # Check if the user is an admin
+        current_user = get_jwt_identity()
+        user = Users.query.filter_by(username=current_user).first()
+        if not user or not user.is_admin:
+            return jsonify({"message": "Unauthorized"}), 403
+
+        try:
+            comment = Comments.query.get(comment_id)
+            if not comment:
+                return jsonify({"message": "Comment not found"}), 404
+
+            db.session.delete(comment)
+            db.session.commit()
+
+            return jsonify({"message": "Comment deleted successfully"}), 200
+        except SQLAlchemyError as e:
+            app.logger.error(f"Failed to delete comment: {str(e)}")
+            return {"message": "Internal Server Error"}, 500
+
+
+class DeleteUser(Resource):
+    @jwt_required()
+    def delete(self, user_id):
+        # Check if the user is an admin
+        current_user = get_jwt_identity()
+        user = Users.query.filter_by(username=current_user).first()
+        if not user or not user.is_admin:
+            return jsonify({"message": "Unauthorized"}), 403
+
+        try:
+            user_to_delete = Users.query.get(user_id)
+            if not user_to_delete:
+                return jsonify({"message": "User not found"}), 404
+
+            db.session.delete(user_to_delete)
+            db.session.commit()
+
+            return jsonify({"message": "User deleted successfully"}), 200
+        except SQLAlchemyError as e:
+            app.logger.error(f"Failed to delete user: {str(e)}")
+            return {"message": "Internal Server Error"}, 500
+
+
+class Userss(Resource):
+    @jwt_required()
+    def get(self):
+        # Check if the user is an admin
+        current_user = get_jwt_identity()
+        user = Users.query.filter_by(username=current_user).first()
+        if not user or not user.is_admin:
+            return jsonify({"message": "Unauthorized"}), 403
+
+        try:
+            users = Users.query.all()
+
+            # Create a list to hold the user data
+            users_data = []
+
+            # Loop through the users
+            for user in users:
+                # Append the user info to the users_data list
+                users_data.append({
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "is_admin": user.is_admin,
+                })
+
+            return jsonify(users_data)
+        except SQLAlchemyError as e:
+            app.logger.error(f"Failed to retrieve users: {str(e)}")
+            return {"message": "Internal Server Error"}, 500
+

@@ -62,7 +62,7 @@ const Navbar = () => {
         {localStorage.getItem("is_admin") === "true" && (
           <li
             onClick={() => {
-              navigate("/admin/doctor_claims");
+              navigate("/admin");
             }}
             className="p-4 hover:cursor-pointer"
           >
@@ -153,7 +153,7 @@ const Navbar = () => {
           {localStorage.getItem("is_admin") === "true" && (
             <li
               onClick={() => {
-                navigate("/admin/doctor_claims");
+                navigate("/admin");
               }}
               className="p-4 hover:cursor-pointer"
             >

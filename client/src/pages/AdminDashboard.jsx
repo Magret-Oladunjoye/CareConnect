@@ -4,58 +4,9 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import axios from "axios";
 
-const UserProfileManagement = () => {
-  
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get("/admin/users", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      });
-      console.log("Users response:", response.data);
-      setUsers(response.data);
-      setLoading(false);
-     
-    } catch (error) {
-      setError(error.message);
-      setLoading(false);
-    }
-  };
-
-  const deleteUser = async (userId) => {
-    try {
-      await axios.delete(`/admin/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      });
-      console.log("User deleted successfully");
-      // Refresh users list
-      fetchUsers();
-    } catch (error) {
-      console.error("Failed to delete user", error);
-    }
-  };
-
-  if (loading) {
-    return <p>Loading users...</p>;
-  }
-
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
-
+const UserProfileManagement = ({ users, deleteUser }) => {
   return (
-    <div>
+    <div className="container mx-auto border bg-sky-50 rounded-lg m-16 p-12 flex-grow">
       <h1 className="text-2xl font-bold mb-4">User Profile Management</h1>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-300">
@@ -198,6 +149,7 @@ const UserCommentTable = ({ comments, deleteComment }) => {
                     <button
                       className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
                       onClick={() => deleteComment(comment.id)}
+                      
                     >
                       Delete
                     </button>
@@ -370,11 +322,10 @@ const AdminDashboard = () => {
     }
   };
 
-  const sendApprovalEmail = async (doctorId, name) => {
+  const sendApprovalEmail = async (claimId, name) => {
     try {
-      await axios.post(
-        `/admin/doctor_claims/${doctorId}/send_approval_email`,
-        null,
+      await axios.get(
+        `/admin/doctor_claims/${claimId}/send_approval_email`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -386,7 +337,7 @@ const AdminDashboard = () => {
       console.error("Failed to send approval email", error);
     }
   };
-
+  
   if (loadingClaims || loadingComments) {
     return <p>Loading...</p>;
   }
@@ -399,29 +350,21 @@ const AdminDashboard = () => {
     <div>
       <Navbar />
       <div className="container mx-auto">
-        <div className="flex flex-col md:flex-row">
-          <div className="md:w-1/2">
-            <UserProfileManagement
-              users={users}
-              deleteUser={deleteUser}
-            />
-          </div>
-          <div className="md:w-1/2">
-            <DoctorClaimTable
-              claims={claims}
-              deleteClaim={deleteClaim}
-              sendApprovalEmail={sendApprovalEmail}
-              openModal={openModal}
-            />
-          </div>
-        </div>
-        <div className="flex flex-col md:flex-row">
-          <div className="md:w-1/2">
-            <UserCommentTable
-              comments={comments}
-              deleteComment={deleteComment}
-            />
-          </div>
+        <div className="flex flex-col">
+          <UserProfileManagement
+            users={users}
+            deleteUser={deleteUser}
+          />
+          <DoctorClaimTable
+            claims={claims}
+            deleteClaim={deleteClaim}
+            sendApprovalEmail={sendApprovalEmail}
+            openModal={openModal}
+          />
+          <UserCommentTable
+            comments={comments}
+            deleteComment={deleteComment}
+          />
         </div>
       </div>
       {showModal && selectedClaim && (

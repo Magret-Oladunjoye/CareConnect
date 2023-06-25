@@ -9,6 +9,8 @@ import axios from "axios";
 import CommentStats from "./CommentStats";
 import StarRating from "./StarRating";
 import { useParams } from "react-router-dom";
+import Footer from "./Footer";
+import Modal from 'react-modal';
 
 const availabilityOptions = [
   { value: 'Monday', label: 'Monday' },
@@ -74,16 +76,16 @@ const DoctorCard = ({ doctor }) => {
   };
 
   return (
-    <div className="m-9 flex md:grid md:grid-cols-7 items-center border rounded-xl bg-gradient-to-r from-sky-100 to-700">
-      <div className="doctor-card__image">
+    <div className="p-4 m-4 flex md:grid md:grid-cols-7 items-center border rounded-xl bg-gradient-to-br from-gray-200 to-sky-200 border-gray-200 shadow-xl">
+      <div className="justify-center">
         <img
-          className="m-8 w-24 h-24 rounded-full"
+          className="w-24 h-24 rounded-full"
           src={imageError ? avatar : doctor.Image_Src}
           alt={`${doctor.Name}`}
           onError={handleImageError}
         />
       </div>
-      <div className="col-span-4 text-left">
+      <div className="col-span-4 text-center md:text-left">
         <h1 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{doctor.Name}</h1>
         <p>{t('Specialty')}: {translatedSpecialty}</p>
         <p>{t('Location')}: {translatedLocation}</p>
@@ -141,6 +143,65 @@ const AvailabilityFilterCard = ({ availabilityFilter, setAvailabilityFilter, tog
   
 };
 
+
+
+
+const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+const AvailabilityFilterModal = ({ isOpen, onRequestClose, selectedDays, onSelectDay }) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      contentLabel="Availability Filter"
+      style={{
+        overlay: {
+          backgroundColor: 'rgba(0, 0, 0, 0.75)', // This will give you a dark overlay that covers the entire page
+        },
+        content: {
+          top: '50%',
+          left: '50%',
+          right: 'auto',
+          bottom: 'auto',
+          marginRight: '-50%',
+          transform: 'translate(-50%, -50%)',
+          width: '30%', 
+          height: '40%', 
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          border: '2px solid #ccc',
+          background: '#fff',
+          overflow: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          borderRadius: '10px',
+          outline: 'none',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+        },
+      }}
+    >
+      <h2>Select Available Days</h2>
+      {daysOfWeek.map((day) => (
+        <div key={day}>
+          <input
+            type="checkbox"
+            id={day}
+            name={day}
+            checked={selectedDays.includes(day)}
+            onChange={() => onSelectDay(day)}
+          />
+          <label htmlFor={day}>{day}</label>
+        </div>
+      ))}
+      <button className="p-2 bg-gray-300 hover:bg-gray-200 rounded-md" onClick={onRequestClose}>Apply</button>
+    </Modal>
+  );
+};
+
+
+
 const Doctorlist = () => {
   const { doctors, loading } = useSearch();
   const [filteredDoctors, setFilteredDoctors] = useState(doctors);
@@ -151,7 +212,19 @@ const Doctorlist = () => {
   const [insuranceFilter, setInsuranceFilter] = useState("");
   const [userLocation, setUserLocation] = useState("");
   const [showAvailabilityCard, setShowAvailabilityCard] = useState(false);
+  const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
+  const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
+  const toggleAvailabilityModal = () => {
+    setShowAvailabilityModal(!showAvailabilityModal);
+  };
+  const handleSelectDay = (day) => {
+    if (availabilityFilter.includes(day)) {
+      setAvailabilityFilter(availabilityFilter.filter((d) => d !== day));
+    } else {
+      setAvailabilityFilter([...availabilityFilter, day]);
+    }
+  };
   const doctorsPerPage = 10;
   const hasNoResults = doctors.length === 0 && !loading;
 
@@ -236,62 +309,63 @@ const Doctorlist = () => {
       <div className="min-h-screen md:mx-12 lg:mx-32">
         <div className="md:p-12 border m-6 rounded-xl bg-sky-200 bg-opacity-30 shadow-xl">
         <div className="p-4">
-          <SearchBar></SearchBar>
+          <SearchBar
+          onLocationChange={setLocationFilter}
+          onRatingChange={setRatingFilter}></SearchBar>
           </div>
         <div className="grid md:flex justify-center md:justify-end text-center items-center p-2">
-          <label className="filter-label">Filter by:  </label>
-          <div className="filter-item">
-            <select value={ratingFilter} onChange={(e) => setRatingFilter(e.target.value)}>
-              <option value="">All Ratings</option>
-              <option value="5">5 Stars</option>
-              <option value="4">4 Stars</option>
-              <option value="3">3 Stars</option>
-              <option value="2">2 Stars</option>
-              <option value="1">1 Star</option>
+          <label className="filter-label">{t("Filter by:")}</label>
+        
+            <select value={ratingFilter} onChange={(e) => setRatingFilter(e.target.value)} className="p-2 border border-gray-300 rounded-md">
+              <option value="">{t("All Ratings")}</option>
+              <option value="5">{t("5 Stars")}</option>
+              <option value="4">{t("4 Stars")}</option>
+              <option value="3">{t("3 Stars")}</option>
+              <option value="2">{t("2 Stars")}</option>
+              <option value="1">{t("1 Star")}</option>
             </select>
-          </div>
-          <div className="filter-item">
-            <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}>
-              <option value="">All Locations</option>
+         
+            <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} className="p-2 border border-gray-300 rounded-md">
+              <option value="">{t("All Locations")}</option>
               <option value="Ankara">Ankara</option>
               <option value="Kocaeli">Kocaeli</option>
               <option value="Izmir">Izmir</option>
               <option value="Istanbul">Istanbul</option>
             </select>
-          </div>
-
-          <div className="filter-item">
-            <select value={insuranceFilter} onChange={(e) => setInsuranceFilter(e.target.value)}>
-              <option value="">All Insurance Types</option>
+         
+            <select value={insuranceFilter} onChange={(e) => setInsuranceFilter(e.target.value)} className="p-2 border border-gray-300 rounded-md">
+              <option value="">{t("All Insurance Types")}</option>
               <option value="Allianz Sigorta AŞ">Allianz Sigorta AŞ</option>
               <option value="Sosyal Guvenlik Kurumu (SGK)">Sosyal Guvenlik Kurumu (SGK)</option>
               <option value="Aksigorta AŞ">Aksigorta AŞ</option>
               <option value="Anadolu Anonim Türk Sigorta Şirketi">Anadolu Anonim Türk Sigorta Şirketi</option>
               <option value="Mapfre Sigorta AŞ">Mapfre Sigorta AŞ</option>
             </select>
-          </div>
-
-          <div className="filter-item">
-            <button className="availability-filter-button" onClick={toggleAvailabilityCard}>
-              {availabilityFilter.length === 0 ? "All Days" : `${availabilityFilter.length} selected`}
+          
+                    <button className="p-2 border border-gray-300 rounded-md" onClick={toggleAvailabilityModal}>
+              {availabilityFilter.length === 0 ? t("All Days") : `${availabilityFilter.length} ${t("selected")}`}
             </button>
-            {showAvailabilityCard && (
-              <AvailabilityFilterCard
-                availabilityFilter={availabilityFilter}
-                setAvailabilityFilter={setAvailabilityFilter}
-                toggleCard={toggleAvailabilityCard}
-              />
-            )}
-          </div>
-          </div>
-          <button className="filter-button" onClick={handleFilter}>
-            Apply Filters
+            <AvailabilityFilterModal
+              isOpen={showAvailabilityModal}
+              onRequestClose={toggleAvailabilityModal}
+              selectedDays={availabilityFilter}
+              onSelectDay={handleSelectDay}
+            />
+          <button
+              onClick={resetFilters}
+              className="p-2 bg-gray-300 hover:bg-gray-200 rounded-md"
+            >
+              {t("Reset Filters")}
+            </button>
+          <button className="p-2 bg-gray-300 hover:bg-gray-200 rounded-md" onClick={handleFilter}>
+            {t("Apply Filters")}
           </button>
+        </div>
         </div>
 
         <div className="doctor-cards justify-center items-center h-screen">
           {hasNoResults ? (
-            <p className="no-results-text">
+            <p className="text-center">
               No Results found.
               <br />
               Try changing your search criteria, location, and filters to improve your results.
@@ -305,16 +379,39 @@ const Doctorlist = () => {
             ))
           )}
         </div>
-        <div className="pagination" style={{ textAlign: 'center', position: 'fixed', bottom: 0, left: 0, right: 0 }}>
-          {currentPage > 1 && (
-            <button onClick={goToPreviousPage}>&lt; Previous</button>
-          )}
-          <span>{currentPage}</span>
-          {currentPage < totalPages && (
-            <button onClick={goToNextPage}>Next &gt;</button>
-          )}
-        </div>
       </div>
+      <div className="pagination fixed bottom-0 left-0 right-0  py-2" style={{ textAlign: 'center', padding: '10px' }}>
+  <nav aria-label="Page navigation example">
+    <ul className="list-none flex justify-center">
+      {currentPage > 1 && (
+        <li>
+          <button
+            className="relative block rounded-full bg-transparent px-3 py-1.5 text-sm text-neutral-600 transition-all duration-300 hover:bg-neutral-100 dark:text-white dark:hover:bg-neutral-700 dark:hover:text-white"
+            onClick={goToPreviousPage}
+          >
+            &lt;
+          </button>
+        </li>
+      )}
+      <li>
+        <span className="relative block rounded-full bg-primary-100 px-3 py-1.5 text-sm font-medium text-primary-700 transition-all duration-300">
+          {currentPage}
+        </span>
+      </li>
+      {currentPage < totalPages && (
+        <li>
+          <button
+            className="relative block rounded-full bg-transparent px-3 py-1.5 text-sm text-neutral-600 transition-all duration-300 hover:bg-neutral-100 dark:text-white dark:hover:bg-neutral-700 dark:hover:text-white"
+            onClick={goToNextPage}
+          >
+            &gt;
+          </button>
+        </li>
+      )}
+    </ul>
+  </nav>
+</div>
+
     </div>
   );
 };

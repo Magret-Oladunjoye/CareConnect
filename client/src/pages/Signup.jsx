@@ -3,6 +3,8 @@ import logo from "../images/logo.png";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useAuth } from "../AuthContext";
+
 
 const SignupForm = () => {
   const navigate = useNavigate();
@@ -10,6 +12,7 @@ const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const { setIsLoggedIn } = useAuth(); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +28,9 @@ const SignupForm = () => {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("access_token", data.access_token);
-        navigate("/");
+        localStorage.setItem("username", name); // Store the username in localStorage
+        setIsLoggedIn(true);
+        navigate("/auth/login");
       } else {
         setError(data.message);
       }

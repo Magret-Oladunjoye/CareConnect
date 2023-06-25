@@ -1,4 +1,3 @@
-
 from logging.handlers import RotatingFileHandler
 from flask import Flask, jsonify, make_response
 from flask_cors import CORS
@@ -6,23 +5,31 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate, upgrade
 from flask.cli import AppGroup
 import logging
-logging.basicConfig(level=logging.DEBUG)
 from models import db
 from auth import RefreshResource, Login, Profile, SignUp, UpdateProfile, DoctorClaim, Admin, AdminDoctorClaim, UserComments, DeleteComment, Userss, DeleteUser
 from flask_restful import Api
-from views import views, search_bp
 from config import DevConfig, ProdConfig
 from werkzeug.exceptions import HTTPException
 from nlp_training import train_nlp_algorithm
+from flask_caching import Cache
+from flask_mail import Mail, Message
 
 
-
-
-
-
+cache = Cache()
+mail = Mail()
 def create_app(config):
     app = Flask(__name__, static_url_path="/home", static_folder="./client/build", template_folder="./client/build")
     app.config.from_object(config)
+
+    # Configure cache settings
+    cache_config = {
+        'CACHE_TYPE': 'simple', 
+        'CACHE_DEFAULT_TIMEOUT': 60
+    }
+
+    # Initialize cache
+    cache.init_app(app, config=cache_config)
+    mail.init_app(app)
 
     CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
@@ -46,11 +53,27 @@ def create_app(config):
     api.add_resource(RefreshResource, "/auth/refresh")
     api.add_resource(DoctorClaim, '/doctor/claim')
     api.add_resource(Admin, "/admin")
-    api.add_resource(AdminDoctorClaim, '/admin/doctor_claims', '/admin/doctor_claims/<int:claim_id>',  '/admin/doctor_claims/<int:claim_id>/send_approval_email')
+    api.add_resource(
+    AdminDoctorClaim,
+    '/admin/doctor_claims',
+    '/admin/doctor_claims/<int:claim_id>',
+
+)
     api.add_resource(UserComments, "/admin/user/comments")
     api.add_resource(DeleteComment, "/admin/user/comments/<int:comment_id>")
     api.add_resource(DeleteUser, "/admin/users/<int:user_id>")
     api.add_resource(Userss, "/admin/users")
+    
+    app.config['MAIL_SERVER'] = 'smtp.yandex.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+    app.config['MAIL_USERNAME'] = 'magret.oladunjoye@yandex.com'
+    app.config['MAIL_PASSWORD'] = 'qllcfsvhtqlhkcrg'
+    app.config['MAIL_DEFAULT_SENDER'] = 'magret.oladunjoye@yandex.com'
+    app.config['MAIL_DEBUG'] = True
+    
+    
 
     @app.route("/")
     def index():
@@ -59,13 +82,17 @@ def create_app(config):
     @app.errorhandler(404)
     def not_found(err):
         return app.send_static_file("index.html")
+    
 
-    app.register_blueprint(views)
-    app.register_blueprint(search_bp)
+        
     
-    
+
+
+   
 
     return app
+
+
 
 # Assuming you've already created your Flask app as 'app'
 log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -85,10 +112,13 @@ logger.addHandler(console_handler)
 
 app = create_app(ProdConfig)
 
+from views import views, search_bp
+
+app.register_blueprint(views)
+app.register_blueprint(search_bp)
+
 if __name__ == "__main__":
-    app.run(debug = True, port = "5000")
-
-
+    app.run(debug=True, port="5000")
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 

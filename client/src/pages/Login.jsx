@@ -56,9 +56,12 @@ const LoginForm = ({ navigate, redirectToSignup, setRedirectToSignup }) => {
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("is_admin");
     setIsLoggedIn(false);
     navigate("/auth/login");
   };
+  
 
   return (
     <div className="bg-white rounded-2xl shadow-2xl flex flex-col w-full md:w-1/3 items-center max-w-4xl transition duration-1000 ease-out">

@@ -87,7 +87,7 @@ const SearchBar = () => {
         type="text"
         ref={searchInputRef}
         className="block w-full px-4 py-2 bg-white border shadow-xl focus:border-cyan-400 focus:ring-cyan-300 focus:outline-none focus:ring focus:ring-opacity-40"
-        placeholder={t("Doctor, Specialty")}
+        placeholder={t("Doctor, Specialty, Treatments")}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />

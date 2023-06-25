@@ -1,6 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
+
 
 const CommentStats = ({ comments }) => {
+  const { t } = useTranslation();
   const numComments = comments ? comments.length : 0; // Check if comments is defined before accessing its length
   let avgRating = 0;
 
@@ -12,8 +15,8 @@ const CommentStats = ({ comments }) => {
   return (
     <div className="inlineflex p-4">
       <p>
-        <strong>{numComments}</strong> Reviews |
-        <strong>{avgRating.toFixed(1)} out of 5 stars</strong>
+        <strong>{numComments}</strong> {t("Reviews")} |
+        <strong>{avgRating.toFixed(1)} {t("out of 5 stars")}</strong>
       </p>
     </div>
   );

@@ -20,9 +20,10 @@ const DoctorCard = ({ doctor }) => {
         <p>Specialty: {Specialty}</p>
         <p>Location: {Location}</p>
         <p>Average Rating: {averageRating}</p>
-        <Link to={`/doctor/${doctor.id}`} className="doctor-card__link">
-          View Details
-        </Link>
+        <div className="hover:underline text-sky-900">
+        <a href={`/doctor/${doctor.id}`} >
+        View Details
+      </a></div>
       </div>
     </div>
   );

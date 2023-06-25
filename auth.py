@@ -1,7 +1,7 @@
 import json
 import logging
 from flask_cors import cross_origin
-from flask_restful import Resource, reqparse
+from flask_restful import Api, Resource, reqparse
 from models import DoctorClaimRequest, Users, db, Comments, Doctors
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import (
@@ -18,8 +18,10 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 from models import Doctors
 from flask_mail import Mail, Message
+from flask_restful import Api
 from flask import current_app
 mail = Mail()
+
 
 # Removed Namespace import and signup_model, login_model, profile_model
 
@@ -179,41 +181,11 @@ class DoctorClaim(Resource):
         db.session.commit() 
 
         return make_response(jsonify({"message": "Doctor claim request submitted successfully"}), 201)
+    
 
-    def send_approval_email(self, doctor_email, doctor_name):
-        msg = Message(
-            "Claim Approval",
-            sender=current_app.config["MAIL_DEFAULT_SENDER"],
-            recipients=[doctor_email],
-        )
-        msg.body = f"Hello, Dr. {doctor_name}! Your claim has been approved. You can now manage your account in the profile section."
-        mail.send(msg)
+  
+    
 
-    def put(self, claim_id):
-        try:
-            claim = DoctorClaimRequest.query.get(claim_id)
-            if not claim:
-                return {"message": "Claim not found"}, 404
-
-            data = request.get_json()
-
-            status = data.get('status')
-            if status not in ['approved', 'rejected']:
-                return {"message": "Invalid status value"}, 400
-
-            claim.status = status
-            db.session.commit()
-
-            if status == "approved":
-                # Get the doctor's email and name
-                doctor_email = claim.email
-                doctor_name = f"{claim.first_name} {claim.last_name}"
-                self.send_approval_email(doctor_email, doctor_name)
-
-            return {"message": f"Claim {claim_id} updated to {status}"}, 200
-        except Exception as e:
-            app.logger.error(f"Failed to update claim status: {str(e)}")
-            return {"message": "Internal Server Error"}, 500
 
 
 class RefreshResource(Resource):
@@ -246,7 +218,7 @@ class Admin(Resource):
         except SQLAlchemyError as e:
             app.logger.error(f"Failed to get doctor claims: {str(e)}")
             return {"message": "Internal Server Error"}, 500
-
+        
 
 class AdminDoctorClaim(Resource):
     @jwt_required()
@@ -288,15 +260,46 @@ class AdminDoctorClaim(Resource):
             claim.status = status
             db.session.commit()
 
+            if status == "approved":
+                # Get the doctor's email and name
+                doctor_email = claim.email
+                doctor_name = f"{claim.first_name} {claim.last_name}"
+                self.send_approval_email(doctor_email, doctor_name)
+
             return {"message": f"Claim {claim_id} updated to {status}"}, 200
         except Exception as e:
-            app.logger.error(f"Failed to update claim status: {str(e)}")
+           
             return {"message": "Internal Server Error"}, 500
 
+    @jwt_required()
+    def delete(self, claim_id):
+        try:
+            current_user = get_jwt_identity()
+            user = Users.query.filter_by(username=current_user).first()
 
-def handle_type_error(e):
+            # Ensure the current user is an admin
+            if not user.is_admin:
+                return {"message": "Unauthorized access"}, 401
 
-    return jsonify({"message": "An error occurred while processing your request."}), 500
+            claim = DoctorClaimRequest.query.get(claim_id)
+            if not claim:
+                return {"message": "Claim not found"}, 404
+
+            db.session.delete(claim)
+            db.session.commit()
+
+            return {"message": f"Claim {claim_id} deleted successfully"}, 200
+        except Exception as e:
+            app.logger.error(f"Failed to delete claim: {str(e)}")
+            return {"message": "Internal Server Error"}, 500
+        
+from flask import current_app
+from flask_mail import Message
+from models import db
+from flask_restful import Resource
+
+
+
 
 
 class UserComments(Resource):
@@ -338,24 +341,24 @@ class UserComments(Resource):
 class DeleteComment(Resource):
     @jwt_required()
     def delete(self, comment_id):
-        # Check if the user is an admin
-        current_user = get_jwt_identity()
-        user = Users.query.filter_by(username=current_user).first()
-        if not user or not user.is_admin:
-            return jsonify({"message": "Unauthorized"}), 403
-
         try:
+            current_user = get_jwt_identity()
+            user = Users.query.filter_by(username=current_user).first()
+            if not user or not user.is_admin:
+                return {"message": "Unauthorized"}, 403
+
             comment = Comments.query.get(comment_id)
             if not comment:
-                return jsonify({"message": "Comment not found"}), 404
+                return {"message": "Comment not found"}, 404
 
             db.session.delete(comment)
             db.session.commit()
 
-            return jsonify({"message": "Comment deleted successfully"}), 200
+            return {"message": "Comment deleted successfully"}, 200
         except SQLAlchemyError as e:
             app.logger.error(f"Failed to delete comment: {str(e)}")
             return {"message": "Internal Server Error"}, 500
+
 
 
 class DeleteUser(Resource):
@@ -378,7 +381,7 @@ class DeleteUser(Resource):
             return jsonify({"message": "User deleted successfully"}), 200
         except SQLAlchemyError as e:
             app.logger.error(f"Failed to delete user: {str(e)}")
-            return {"message": "Internal Server Error"}, 500
+            return jsonify ({"message": "Internal Server Error"}), 500
 
 
 class Userss(Resource):

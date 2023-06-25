@@ -44,7 +44,7 @@ const DoctorDetails = () => {
   } = doctor;
 
   return (
-    <div className="doctor-details">
+    <div className="text-center md:text-left">
       <Navbar></Navbar>
       <ProfileBanner
         id={id}

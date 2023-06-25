@@ -43,6 +43,7 @@ function App() {
                 <Route path="/search_doctor/:id" element={<DoctorDetails />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/doctor/claim/:id" element={<ClaimProfile />} />
+                <Route path="/doctor/claim" element={<ClaimProfile />} />
               </Routes>
             </UserProvider>
           </CommentProvider>

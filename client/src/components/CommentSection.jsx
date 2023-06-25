@@ -41,9 +41,12 @@ function CommentSection() {
   useEffect(() => {
     const fetchLoggedInUser = async () => {
       try {
+        const token = localStorage.getItem("access_token");
+        if (!token) return; // Skip fetching if no token is available
+  
         const response = await axios.get("/auth/profile", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         const { data } = response;
@@ -52,13 +55,13 @@ function CommentSection() {
         setError("Failed to fetch logged-in user");
       }
     };
-
+  
     fetchLoggedInUser();
   }, []);
+  
 
   const handleCommentSubmit = async (event) => {
     event.preventDefault();
-    if (!loggedInUser) return; // user must be logged in to comment.
     if (!newComment.trim()) return; // don't allow empty comments
     setShowPopup(true);
     
@@ -79,7 +82,7 @@ function CommentSection() {
       if (response.status === 200) {
         // Comment and rating added successfully
         const newCommentData = {
-          username: loggedInUser.username,
+          username: loggedInUser ? loggedInUser.username : "Anonymous",
           rating,
           comment: newComment,
           date: new Date().toLocaleString(), // Update the date format here
@@ -99,23 +102,13 @@ function CommentSection() {
       setError("Error adding comment");
     }
   };
-  // Comment Submitted Pop-up
-  useEffect(() => {
-    if (showPopup) {
-      const timer = setTimeout(() => {
-        setShowPopup(false);
-      }, 1000); //close after 1 second
-
-      return () => clearTimeout(timer);
-    }
-  }, [showPopup]);
 
   // Comment Submitted Pop-up
   useEffect(() => {
     if (showPopup) {
       const timer = setTimeout(() => {
         setShowPopup(false);
-      }, 1000); //close after 1 second
+      }, 1000); // Close after 1 second
 
       return () => clearTimeout(timer);
     }
@@ -161,7 +154,7 @@ function CommentSection() {
             </form>
           ) : (
             <p className="text-lg font-bold mb-4">
-              Please <a href="/auth/login">log in</a> to leave a comment.
+              Please <a href="/auth/login" className="hover:underline">Log in</a> or <a href="/auth/signup" className="hover:underline">Create An Account</a> to leave a comment.
             </p>
           )}
 

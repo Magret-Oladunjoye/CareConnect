@@ -27,7 +27,7 @@ const Hero = () => {
         <SearchBar />
         <div className="p-12">
         <button className="px-4 py-2 border rounded-md drop-shadow-2xl shadow border-gray-300 bg-gray-300 hover:underline bg-opacity-80 text-gray-900 font-light">
-          <a href="/claim"> Physicians: Claim Your Profile Here</a>
+          <a href="/doctor/claim" target="_blank"> {t("Physicians: Claim Your Profile Here")}</a>
         </button>
       </div>
       

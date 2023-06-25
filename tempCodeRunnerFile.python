@@ -1,0 +1,13 @@
+def send_simple_message():
+    	return requests.post(
+		"https://api.mailgun.net/v3/sandbox8ef22bb334404091aa35db92cfd1b5af.mailgun.org/messages",
+		auth=("api", "4caf18cef2c97e779858540a10150ec3-135a8d32-480dfa5b"),
+		data={"from": "Mailgun Sandbox <postmaster@sandbox8ef22bb334404091aa35db92cfd1b5af.mailgun.org>",
+			"to": "Magret Oladunjoye <magretoladunjoye9@gmail.com>",
+			"subject": "Hello Magret Oladunjoye",
+			"text": "Congratulations Magret Oladunjoye, you just sent an email with Mailgun!  You are truly awesome!"})
+
+# You can see a record of this email in your logs: https://app.mailgun.com/app/logs.
+
+# You can send up to 300 emails/day from this sandbox server.
+# Next, you should add your own domain so you can send 10000 emails/month for free.

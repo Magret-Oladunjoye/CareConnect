@@ -41,24 +41,26 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
-    setIsLoggedIn(false); // Add this line
+    localStorage.removeItem("username");
+    localStorage.removeItem("is_admin");
+    setIsLoggedIn(false);
     navigate("/auth/login");
   };
-
+  
   return (
-    <div className="flex justify-between items-center h-15 w-screen mx-auto px-4 bg-sky-100 drop-shadow-lg">
-      <header className="px-4 py-2">
-        <a
-          onClick={() => {
-            navigate("/");
-          }}
-          className="hover:cursor-pointer"
-        >
-          <img src={logo} width="250" alt="Logo" />
-        </a>
-      </header>
-
-      <ul className="invisible lg:visible lg:flex space-x-4">
+  <div>
+     <div className="flex justify-between items-center content-center max-h-24 w-screen mx-auto p-2 bg-sky-100 drop-shadow-lg lg:px-48">
+        <header className="px-4 py-2">
+          <a
+            onClick={() => {
+              navigate("/");
+            }}
+            className="hover:cursor-pointer"
+          >
+            <img src={logo} width="250" alt="Logo" />
+          </a>
+        </header>
+        <ul className="invisible lg:visible lg:flex space-x-4">
         {localStorage.getItem("is_admin") === "true" && (
           <li
             onClick={() => {
@@ -69,7 +71,6 @@ const Navbar = () => {
             {t("Admin Dashboard")}
           </li>
         )}
-
         {localStorage.getItem("access_token") && (
           <React.Fragment>
             <li
@@ -78,15 +79,14 @@ const Navbar = () => {
               }}
               className="text-white border bg-800 hover:bg-700 rounded-2xl text-lg px-6 py-2 text-center drop-shadow-xl"
             >
-              {t(" Manage Account")}
+              {isLoggedIn ? t("Manage Account") : t("Login")}
             </li>
-            <button
-              onClick={handleLogout}
-              type="button"
-              className="border border-700 rounded-2xl px-6 py-2 hover:underline"
+            <li
+              className={`border border-700 rounded-2xl px-6 py-2 hover:underline"
+              ${isLoggedIn ? t("") : "hidden"}`}
             >
-              {t("Logout")}
-            </button>
+              <button onClick={handleLogout}>{ isLoggedIn ? "Log Out" : ""} </button>
+            </li>
           </React.Fragment>
         )}
 
@@ -98,72 +98,72 @@ const Navbar = () => {
             type="button"
             className="text-white border bg-800 hover:bg-700 rounded-2xl text-lg px-6 py-2 text-center drop-shadow-xl"
           >
-            Sign In
+            {t("Sign In")}
           </button>
         )}
-      </ul>
-      <div onClick={handleNav} className="block lg:hidden">
-        {nav ? (
-          <AiOutlineClose size={20} svg className="fill-black" />
-        ) : (
-          <AiOutlineMenu size={20} svg className="fill-black" />
-        )}
-      </div>
+        </ul>
+        <div onClick={handleNav} className="block lg:hidden">
+          {nav ? (
+            <AiOutlineClose size={20} svg className="fill-black" />
+          ) : (
+            <AiOutlineMenu size={20} svg className="fill-black" />
+          )}
+        </div>
+      </ div>
       <div
         className={`bg-700 opacity-80 w-full p-4 lg:hidden lg:w-auto shadow-lg border border-700 rounded-lg ${
           nav ? "" : "hidden"
-        }`}
-      >
+        }`}>
         <header className="px-6 py-6">
-          <img src={logo} width="250" alt="Logo" />
+        <img src={logo} width="250" alt="Logo" />
         </header>
-        <ul className="text-lg font-light rounded-lg text-white text-center hover:cursor-pointer">
-          <li
-            onClick={() => {
-              navigate("/");
-            }}
-            className="block py-2 hover:bg-800 md:border-0 md:p-0"
-          >
-            Home
-          </li>
-          <hr />
-          <li
-            onClick={() => {
-              navigate("/auth/login");
-            }}
-            className="p-4 border-b border-900 text-black hover:cursor-pointer"
-          >
-            Login
-          </li>
-          <hr />
-          {/*  Couldn't figure out how to add this: "if logged in -> log out & manage account visible"
-          <li className="block py-2 hover:bg-800 md:border-0 md:p-0">
-            <button onClick={handleLogin}>
-              {loggedIn ? "Manage Account" : "Login"}
-            </button>
-          </li>
-          <hr />
-          <li
-            className={`block py-2 hover:bg-800 md:border-0 md:p-0 ${
-              loggedIn ? "" : "hidden"
-            }`}
-          >
-            <button onClick={handleLogout}>{loggedIn ? "Log Out" : ""}</button>
-          </li> */}
-          {localStorage.getItem("is_admin") === "true" && (
+            <ul className="text-lg font-light rounded-lg text-white text-center hover:cursor-pointer">
+              <li
+                onClick={() => {
+                  navigate("/");
+                }}
+                className="block py-2 hover:bg-800 md:border-0 md:p-0"
+              >
+                Home
+              </li>
+
+        <hr />
+        {localStorage.getItem("access_token") && (
+          <React.Fragment>
             <li
               onClick={() => {
-                navigate("/admin");
+                navigate("/auth/profile");
               }}
-              className="p-4 hover:cursor-pointer"
+              className=" py-2 hover:bg-800 text-center md:border-0 md:p-0"
             >
-              Admin Dashboard
+              {isLoggedIn ? t("Manage Account") : t("Login")}
             </li>
-          )}
+            <hr />
+            <li
+              className={`block py-2 hover:bg-800 md:border-0 md:p-0 ${
+                isLoggedIn ? "" : "hidden"
+              }`}
+            >
+              <button onClick={handleLogout}>{isLoggedIn ? t("Logout") : ""}</button>
+            </li>
+            <hr />
+          </React.Fragment>
+        )}
+        {localStorage.getItem("is_admin") === "true" && (
+          <li
+            onClick={() => {
+              navigate("/admin");
+            }}
+            className="p-4 hover:cursor-pointer"
+          >
+            {t("Admin Dashboard")}
+          </li>
+        )}
         </ul>
       </div>
-    </div>
+  </div>
   );
 };
+
 
 export default Navbar;

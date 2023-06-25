@@ -55,15 +55,8 @@ const InfoTabs = ({
           <p className="text-justify text-lg font-sans text-zinc-700" id="treatments">
             {treatmentsOffered}
           </p>
-          <button style={{ 
-            backgroundColor: 'turquoise',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            border: 'none',
-            cursor: 'pointer'
-          }}>
-            <a href={contact} target="blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>
+          <button className="bg-800 hover:bg-700 p-4 rounded-xl text-white font-bold justify-end">
+            <a href={contact} target="blank" rel="noopener noreferrer">
               Contact {name}
             </a>
           </button>

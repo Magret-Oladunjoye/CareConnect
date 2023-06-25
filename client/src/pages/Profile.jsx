@@ -11,11 +11,14 @@ const Profile = () => {
   const [workExperience, setWorkExperience] = useState("");
   const [specialInterests, setSpecialInterests] = useState("");
   const [treatmentsOffered, setTreatmentsOffered] = useState("");
+  const [insuranceAccepted, setInsuranceAccepted] = useState("");
+  const [Availability, setAvailability] = useState("");
+
   const [isDoctor, setIsDoctor] = useState(false); // Set to true to see doctor profile details
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    navigate("/login");
+    navigate("/auth/login");
   };
 
   const handleSubmit = (event) => {
@@ -136,6 +139,34 @@ const Profile = () => {
                   onChange={(e) => setTreatmentsOffered(e.target.value)}
                   required
                 />
+                <label
+                htmlFor="Insurance Accepted"
+                className="font-light text-gray-700"
+              >
+                Insurance Accepted
+              </label>
+              <textarea
+                id="insuranceAccepted"
+                name="insuranceAccepted"
+                className="w-full p-2 border rounded shadow-lg"
+                value={insuranceAccepted}
+                onChange={(e) => setInsuranceAccepted(e.target.value)}
+                required
+              />
+              <label
+              htmlFor="availavility"
+              className="font-light text-gray-700"
+            >
+              Availability
+            </label>
+            <textarea
+              id="availability"
+              name="availability"
+              className="w-full p-2 border rounded shadow-lg"
+              value={Availability}
+              onChange={(e) => setAvailability(e.target.value)}
+              required
+            />
               </div>
             )}
 

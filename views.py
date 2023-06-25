@@ -1,6 +1,6 @@
 #create website routes for our websites where users can go to, except login 
 
-from flask import Blueprint, render_template, jsonify, json, request #define that this file is a blueprint of our app
+from flask import Blueprint, current_app, render_template, jsonify, json, request #define that this file is a blueprint of our app
 from database.db import get_db
 from urllib.parse import unquote
 from models import Users
@@ -9,10 +9,17 @@ from nlp_training import preprocess_text, train_nlp_algorithm, recommend_doctors
 from models import Doctors, Users, Comments
 from datetime import datetime
 from sqlalchemy import text
+from flask_caching import Cache
+from flask_mail import Mail, Message
+from models import DoctorClaimRequest
+cache = Cache()
 
 views = Blueprint('views', __name__)
 search_bp = Blueprint('search', __name__, url_prefix='/search')
 #now that we have these blurptints defined, we need to register them in our __init__,py
+
+
+
 
 @views.route('/')
 def index():
@@ -168,7 +175,7 @@ def get_comments_ratings(id):
     return jsonify(comments_data)
 
 
-@views.route('/search_doctor/<id>/average_rating', methods=['GET'])
+@views.route('/search_doctor/<id>/average_rating', methods=['GET']) 
 def get_average_rating(id):
     # Fetch the comments
     comments = Comments.query.filter_by(doctor_id=id).all()
@@ -235,6 +242,7 @@ import pickle
 from models import Doctors
 
 @views.route('/recommend_doctors', methods=['POST'])
+  
 @jwt_required()
 def recommend_doctors():
     current_user = get_jwt_identity()
@@ -263,5 +271,33 @@ def recommend_doctors():
     # Return the recommended doctors as a JSON response
     return jsonify({"recommendations": recommended_doctors_dict}), 200
 
+import traceback
 
+@views.route('/admin/doctor_claims/<int:claim_id>/send_approval_email',  methods=['GET'])
+@jwt_required()
+def send_approval_email(claim_id):
+    
+    claim_request = DoctorClaimRequest.query.get(claim_id)
+    
+    if claim_request is None:
+        return jsonify({'error': 'Claim not found'}), 404
+    
+    doctor = Doctors.query.get(claim_request.doctor_id)
+    
+    if doctor is None:
+        return jsonify({'error': 'Doctor not found'}), 404
 
+     # Prepare and send the email
+    try:
+        msg = Message(
+            "Claim Approval",
+            sender=current_app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[claim_request.email],
+        )
+        msg.body = f"Hello, Dr. {claim_request.first_name}! Your claim has been approved. You can now manage your account in the profile section."
+        current_app.extensions['mail'].send(msg)
+
+        return jsonify({'message': 'Approval email sent successfully'}), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
